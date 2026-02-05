@@ -1,6 +1,3 @@
-import { Footer } from '@/components';
-import { login } from '@/services/ant-design-pro/api';
-import { getFakeCaptcha } from '@/services/ant-design-pro/login';
 import {
   AlipayCircleOutlined,
   LockOutlined,
@@ -20,7 +17,11 @@ import { Alert, App, Tabs } from 'antd';
 import { createStyles } from 'antd-style';
 import React, { useState } from 'react';
 import { flushSync } from 'react-dom';
+import { Footer } from '@/components';
+import { login } from '@/services/ant-design-pro/api';
+import { getFakeCaptcha } from '@/services/ant-design-pro/login';
 import Settings from '../../../../config/defaultSettings';
+
 const useStyles = createStyles(({ token }) => {
   return {
     action: {
@@ -60,9 +61,18 @@ const ActionIcons = () => {
   const { styles } = useStyles();
   return (
     <>
-      <AlipayCircleOutlined key="AlipayCircleOutlined" className={styles.action} />
-      <TaobaoCircleOutlined key="TaobaoCircleOutlined" className={styles.action} />
-      <WeiboCircleOutlined key="WeiboCircleOutlined" className={styles.action} />
+      <AlipayCircleOutlined
+        key="AlipayCircleOutlined"
+        className={styles.action}
+      />
+      <TaobaoCircleOutlined
+        key="TaobaoCircleOutlined"
+        className={styles.action}
+      />
+      <WeiboCircleOutlined
+        key="WeiboCircleOutlined"
+        className={styles.action}
+      />
     </>
   );
 };
@@ -205,7 +215,9 @@ const Login: React.FC = () => {
             </>
           )}
 
-          {status === 'error' && loginType === 'mobile' && <LoginMessage content="验证码错误" />}
+          {status === 'error' && loginType === 'mobile' && (
+            <LoginMessage content="验证码错误" />
+          )}
           {type === 'mobile' && (
             <>
               <ProFormText

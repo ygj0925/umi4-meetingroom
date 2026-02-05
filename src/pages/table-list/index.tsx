@@ -1,5 +1,8 @@
-import { removeRule, rule } from '@/services/ant-design-pro/api';
-import type { ActionType, ProColumns, ProDescriptionsItemProps } from '@ant-design/pro-components';
+import type {
+  ActionType,
+  ProColumns,
+  ProDescriptionsItemProps,
+} from '@ant-design/pro-components';
 import {
   FooterToolbar,
   PageContainer,
@@ -9,8 +12,10 @@ import {
 import { useRequest } from '@umijs/max';
 import { Button, Drawer, Input, message } from 'antd';
 import React, { useCallback, useRef, useState } from 'react';
+import { removeRule, rule } from '@/services/ant-design-pro/api';
 import CreateForm from './components/CreateForm';
 import UpdateForm from './components/UpdateForm';
+
 const TableList: React.FC = () => {
   const actionRef = useRef<ActionType | null>(null);
   const [showDetail, setShowDetail] = useState<boolean>(false);
@@ -150,7 +155,9 @@ const TableList: React.FC = () => {
         search={{
           labelWidth: 120,
         }}
-        toolBarRender={() => [<CreateForm key="create" reload={actionRef.current?.reload} />]}
+        toolBarRender={() => [
+          <CreateForm key="create" reload={actionRef.current?.reload} />,
+        ]}
         request={rule}
         columns={columns}
         rowSelection={{
@@ -174,7 +181,11 @@ const TableList: React.FC = () => {
               项 &nbsp;&nbsp;
               <span>
                 服务调用次数总计{' '}
-                {selectedRowsState.reduce((pre, item) => pre + (item.callNo ?? 0), 0)} 万
+                {selectedRowsState.reduce(
+                  (pre, item) => pre + (item.callNo ?? 0),
+                  0,
+                )}{' '}
+                万
               </span>
             </div>
           }

@@ -33,9 +33,9 @@ export default {
       pathRewrite: { '^': '' },
     },
   },
-  pre: {
+  dev: {
     '/api/': {
-      target: 'your pre url',
+      target: 'https://proapi.azurewebsites.net',
       changeOrigin: true,
       pathRewrite: { '^': '' },
     },

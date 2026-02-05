@@ -3,7 +3,12 @@ export default [
     path: '/user',
     layout: false,
     routes: [
-      { path: '/user/login', layout: false, name: '登录', component: './user/login' },
+      {
+        path: '/user/login',
+        layout: false,
+        name: '登录',
+        component: './user/login',
+      },
       { path: '/user', redirect: '/user/login' },
       {
         name: '注册结果',
@@ -11,7 +16,12 @@ export default [
         path: '/user/register-result',
         component: './user/register-result',
       },
-      { name: '注册', icon: 'smile', path: '/user/register', component: './user/register' },
+      {
+        name: '注册',
+        icon: 'smile',
+        path: '/user/register',
+        component: './user/register',
+      },
       { component: '404', path: '/user/*' },
     ],
   },
@@ -47,8 +57,18 @@ export default [
     name: '表单页',
     routes: [
       { path: '/form', redirect: '/form/basic-form' },
-      { name: '基础表单', icon: 'smile', path: '/form/basic-form', component: './form/basic-form' },
-      { name: '分步表单', icon: 'smile', path: '/form/step-form', component: './form/step-form' },
+      {
+        name: '基础表单',
+        icon: 'smile',
+        path: '/form/basic-form',
+        component: './form/basic-form',
+      },
+      {
+        name: '分步表单',
+        icon: 'smile',
+        path: '/form/step-form',
+        component: './form/step-form',
+      },
       {
         name: '高级表单',
         icon: 'smile',
@@ -89,9 +109,24 @@ export default [
         ],
       },
       { path: '/list', redirect: '/list/table-list' },
-      { name: '查询表格', icon: 'smile', path: '/list/table-list', component: './table-list' },
-      { name: '标准列表', icon: 'smile', path: '/list/basic-list', component: './list/basic-list' },
-      { name: '卡片列表', icon: 'smile', path: '/list/card-list', component: './list/card-list' },
+      {
+        name: '查询表格',
+        icon: 'smile',
+        path: '/list/table-list',
+        component: './table-list',
+      },
+      {
+        name: '标准列表',
+        icon: 'smile',
+        path: '/list/basic-list',
+        component: './list/basic-list',
+      },
+      {
+        name: '卡片列表',
+        icon: 'smile',
+        path: '/list/card-list',
+        component: './list/card-list',
+      },
     ],
   },
   {
@@ -100,7 +135,12 @@ export default [
     icon: 'profile',
     routes: [
       { path: '/profile', redirect: '/profile/basic' },
-      { name: '基础详情页', icon: 'smile', path: '/profile/basic', component: './profile/basic' },
+      {
+        name: '基础详情页',
+        icon: 'smile',
+        path: '/profile/basic',
+        component: './profile/basic',
+      },
       {
         name: '高级详情页',
         icon: 'smile',
@@ -115,8 +155,18 @@ export default [
     path: '/result',
     routes: [
       { path: '/result', redirect: '/result/success' },
-      { name: '成功页', icon: 'smile', path: '/result/success', component: './result/success' },
-      { name: '失败页', icon: 'smile', path: '/result/fail', component: './result/fail' },
+      {
+        name: '成功页',
+        icon: 'smile',
+        path: '/result/success',
+        component: './result/success',
+      },
+      {
+        name: '失败页',
+        icon: 'smile',
+        path: '/result/fail',
+        component: './result/fail',
+      },
     ],
   },
   {
@@ -125,9 +175,24 @@ export default [
     path: '/exception',
     routes: [
       { path: '/exception', redirect: '/exception/403' },
-      { name: '403', icon: 'smile', path: '/exception/403', component: './exception/403' },
-      { name: '404', icon: 'smile', path: '/exception/404', component: './exception/404' },
-      { name: '500', icon: 'smile', path: '/exception/500', component: './exception/500' },
+      {
+        name: '403',
+        icon: 'smile',
+        path: '/exception/403',
+        component: './exception/403',
+      },
+      {
+        name: '404',
+        icon: 'smile',
+        path: '/exception/404',
+        component: './exception/404',
+      },
+      {
+        name: '500',
+        icon: 'smile',
+        path: '/exception/500',
+        component: './exception/500',
+      },
     ],
   },
   {
@@ -136,7 +201,12 @@ export default [
     path: '/account',
     routes: [
       { path: '/account', redirect: '/account/center' },
-      { name: '个人中心', icon: 'smile', path: '/account/center', component: './account/center' },
+      {
+        name: '个人中心',
+        icon: 'smile',
+        path: '/account/center',
+        component: './account/center',
+      },
       {
         name: '个人设置',
         icon: 'smile',

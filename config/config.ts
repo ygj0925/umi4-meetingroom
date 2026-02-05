@@ -1,10 +1,11 @@
 // https://umijs.org/config/
 
-import { defineConfig } from '@umijs/max';
 import { join } from 'node:path';
+import { defineConfig } from '@umijs/max';
 import defaultSettings from './defaultSettings';
 import proxy from './proxy';
 import routes from './routes';
+
 const { REACT_APP_ENV = 'dev' } = process.env;
 
 /**
@@ -20,6 +21,16 @@ export default defineConfig({
    * @doc https://umijs.org/docs/api/config#hash
    */
   hash: true,
+  history: {
+    type: defaultSettings.historyType,
+  },
+  metas: [
+    {
+      name: 'viewport',
+      content:
+        'width=device-width initial-scale=1.0 maximum-scale=1.0  viewport-fit=cover minimum-scale=1, user-scalable=no',
+    },
+  ],
   publicPath: PUBLIC_PATH,
   /**
    * @name 兼容性设置
@@ -134,6 +145,7 @@ export default defineConfig({
       async: true,
     },
   ],
+
   //================ pro 插件配置 =================
   presets: ['umi-presets-pro'],
   /**
@@ -151,10 +163,12 @@ export default defineConfig({
     },
     {
       requestLibPath: "import { request } from '@umijs/max'",
-      schemaPath: 'https://gw.alipayobjects.com/os/antfincdn/CA1dOm%2631B/openapi.json',
+      schemaPath:
+        'https://gw.alipayobjects.com/os/antfincdn/CA1dOm%2631B/openapi.json',
       projectName: 'swagger',
     },
   ],
+
   mock: {
     include: ['mock/**/*', 'src/pages/**/_mock.ts'],
   },
@@ -170,4 +184,5 @@ export default defineConfig({
   define: {
     'process.env.CI': process.env.CI,
   },
+  tailwindcss: {},
 });

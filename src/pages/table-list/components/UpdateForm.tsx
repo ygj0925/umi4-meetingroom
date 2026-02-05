@@ -1,4 +1,3 @@
-import { updateRule } from '@/services/ant-design-pro/api';
 import {
   ProFormDateTimePicker,
   ProFormRadio,
@@ -10,6 +9,7 @@ import {
 import { useRequest } from '@umijs/max';
 import { Modal, message } from 'antd';
 import React, { cloneElement, useCallback, useState } from 'react';
+import { updateRule } from '@/services/ant-design-pro/api';
 export type FormValueType = {
   target?: string;
   template?: string;

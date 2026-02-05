@@ -11,7 +11,7 @@ function getProvince(_: Request, res: Response) {
 
 function getCity(req: Request, res: Response) {
   return res.json({
-    data: city[req.params.province],
+    data: city[req.params.province as string],
   });
 }
 
