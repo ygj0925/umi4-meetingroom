@@ -30,7 +30,6 @@ const IntroduceRow = ({
     <Row gutter={24}>
       <Col {...topColResponsiveProps}>
         <ChartCard
-          bordered={false}
           title="总销售额"
           action={
             <Tooltip title="指标说明">
@@ -65,7 +64,6 @@ const IntroduceRow = ({
 
       <Col {...topColResponsiveProps}>
         <ChartCard
-          bordered={false}
           loading={loading}
           title="访问量"
           action={
@@ -97,7 +95,6 @@ const IntroduceRow = ({
       </Col>
       <Col {...topColResponsiveProps}>
         <ChartCard
-          bordered={false}
           loading={loading}
           title="支付笔数"
           action={
@@ -123,7 +120,6 @@ const IntroduceRow = ({
       <Col {...topColResponsiveProps}>
         <ChartCard
           loading={loading}
-          bordered={false}
           title="运营活动效果"
           action={
             <Tooltip title="指标说明">
