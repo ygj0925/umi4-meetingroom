@@ -1,7 +1,7 @@
 import { request } from '@umijs/max';
 import type { GLOBAL, R } from '@/typings';
 import type { LoginParams } from './typings';
-import { Token } from '@/utils/web';
+import { Token } from '@/utils/Web';
 
 export * from './typings';
 

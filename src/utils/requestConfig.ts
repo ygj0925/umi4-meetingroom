@@ -1,6 +1,7 @@
 ﻿import type { RequestOptions } from '@@/plugin-request/request';
 import type { RequestConfig } from '@umijs/max';
 import { message, notification } from 'antd';
+import { isLogin, Token } from '@/utils/Web';
 
 // 错误处理方案： 错误类型
 enum ErrorShowType {
@@ -110,11 +111,30 @@ export const requestConfig: RequestConfig = {
   // 请求拦截器
   requestInterceptors: [
     (config: RequestOptions) => {
-      // 拦截请求配置，进行个性化处理。
+      // 拦截请求配置，进行个性化处理
+      const { url, headers = {} } = config;
       console.log(config, '111');
+      console.log(process.env.requestPrefix, 'requestPrefix');
 
-      const url = config?.url?.concat('?token=123');
-      return { ...config, url };
+      const prefix = process.env.requestPrefix || '/api';
+      const safeUrl = url || '';
+      const suffix = safeUrl.startsWith('/') ? safeUrl.substring(1) : safeUrl;
+      const uri = `${prefix}/${suffix}`;
+
+      console.log(uri, 'uri');
+
+      const newHeaders: any = { ...headers };
+      // 添加 token 到请求头
+      const token = Token.get();
+      if (!newHeaders.Authorization && token && isLogin()) {
+        newHeaders.Authorization = `Bearer ${token}`;
+      }
+
+      return {
+        ...config,
+        url: uri,
+        headers: newHeaders,
+      };
     },
   ],
 

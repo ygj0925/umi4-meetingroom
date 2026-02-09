@@ -15,19 +15,11 @@ export default {
    * @name 详细的代理配置
    * @doc https://github.com/chimurai/http-proxy-middleware
    */
-  test: {
-    // localhost:8000/api/** -> https://preview.pro.ant.design/api/**
-    '/api/': {
-      target: 'https:gptdev.3sbio.com',
-      changeOrigin: true,
-      pathRewrite: { '^/api': '/' },
-    },
-  },
   dev: {
     '/api/': {
-      target: 'https:gptdev.3sbio.com',
+      target: 'https://gptdev.3sbio.com',
       changeOrigin: true,
-      pathRewrite: { '^/api': '/' },
+      pathRewrite: { '^/api': '' },
     },
   },
 };

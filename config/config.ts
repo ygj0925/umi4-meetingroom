@@ -8,6 +8,8 @@ import routes from './routes';
 
 const { REACT_APP_ENV = 'dev' } = process.env;
 
+console.log(proxy[REACT_APP_ENV as keyof typeof proxy], 'process.env');
+
 /**
  * @name 使用公共路径
  * @description 部署时的路径，如果部署在非根目录下，需要配置这个变量
