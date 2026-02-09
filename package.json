@@ -1,5 +1,5 @@
 {
-  "name": "ant-design-pro",
+  "name": "umi4-meetingroom",
   "version": "6.0.0",
   "private": true,
   "description": "An out-of-box UI solution for enterprise applications",
@@ -40,6 +40,7 @@
     "@ant-design/plots": "^2.6.0",
     "@ant-design/pro-components": "^2.7.19",
     "@ant-design/v5-patch-for-react-19": "^1.0.3",
+    "@ant-design/x": "^2.2.2",
     "@antv/l7": "^2.22.7",
     "@antv/l7-react": "^2.4.3",
     "@fullcalendar/core": "^6.1.20",
@@ -64,6 +65,7 @@
     "@types/express": "^5.0.3",
     "@types/jest": "^30.0.0",
     "@types/lodash": "^4.17.10",
+    "@types/numeral": "^2.0.5",
     "@types/react": "^19.1.5",
     "@types/react-dom": "^19.1.5",
     "@types/react-helmet": "^6.1.11",
@@ -76,11 +78,11 @@
     "jest-environment-jsdom": "^29.7.0",
     "lint-staged": "^16.1.2",
     "mockjs": "^1.1.0",
+    "tailwindcss": "^3",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.3",
     "umi-presets-pro": "^2.0.3",
-    "umi-serve": "^1.9.11",
-    "tailwindcss": "^3"
+    "umi-serve": "^1.9.11"
   },
   "engines": {
     "node": ">=20.0.0"

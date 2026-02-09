@@ -19,12 +19,34 @@ interface ResponseStructure {
   showType?: ErrorShowType;
 }
 
+// interface ICodeMessage {
+//   [propName: number]: string;
+// }
+
+// const StatusCodeMessage: ICodeMessage = {
+//   200: '服务器成功返回请求的数据',
+//   201: '新建或修改数据成功。',
+//   202: '一个请求已经进入后台排队（异步任务）',
+//   204: '删除数据成功',
+//   400: '请求错误(400)',
+//   401: '未授权，请重新登录(401)',
+//   403: '拒绝访问(403)',
+//   404: '请求出错(404)',
+//   408: '请求超时(408)',
+//   500: '服务器错误(500)',
+//   501: '服务未实现(501)',
+//   502: '网络错误(502)',
+//   503: '服务不可用(503)',
+//   504: '网络超时(504)',
+// };
+
 /**
  * @name 错误处理
  * pro 自带的错误处理， 可以在这里做自己的改动
  * @doc https://umijs.org/docs/max/request#配置
  */
-export const errorConfig: RequestConfig = {
+export const requestConfig: RequestConfig = {
+  timeout: 30 * 1000,
   // 错误处理： umi@3 的错误处理方案。
   errorConfig: {
     // 错误抛出
@@ -89,6 +111,8 @@ export const errorConfig: RequestConfig = {
   requestInterceptors: [
     (config: RequestOptions) => {
       // 拦截请求配置，进行个性化处理。
+      console.log(config, '111');
+
       const url = config?.url?.concat('?token=123');
       return { ...config, url };
     },

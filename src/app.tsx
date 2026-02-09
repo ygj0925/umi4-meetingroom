@@ -5,8 +5,8 @@ import { currentUser as queryCurrentUser } from '@/services/ant-design-pro/api';
 import '@ant-design/v5-patch-for-react-19';
 import type { RequestConfig, RunTimeLayoutConfig } from '@umijs/max';
 import { history } from '@umijs/max';
+import { requestConfig } from '@/utils/requestConfig';
 import defaultSettings from '../config/defaultSettings';
-import { errorConfig } from './requestErrorConfig';
 
 const isDev = process.env.NODE_ENV === 'development' || process.env.CI;
 const loginPath = '/user/login';
@@ -109,6 +109,5 @@ export const layout: RunTimeLayoutConfig = ({
  * @doc https://umijs.org/docs/max/request#配置
  */
 export const request: RequestConfig = {
-  baseURL: 'https://proapi.azurewebsites.net',
-  ...errorConfig,
+  ...requestConfig,
 };
