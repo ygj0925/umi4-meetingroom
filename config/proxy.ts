@@ -19,7 +19,7 @@ export default {
     '/api/': {
       target: 'https://gptdev.3sbio.com',
       changeOrigin: true,
-      pathRewrite: { '^/api': '' },
+      // pathRewrite: { '^/api': '' },
     },
   },
 };
