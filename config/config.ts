@@ -5,10 +5,9 @@ import { defineConfig } from '@umijs/max';
 import defaultSettings from './defaultSettings';
 import proxy from './proxy';
 import routes from './routes';
+import CompressionPlugin from 'compression-webpack-plugin'
 
-const { REACT_APP_ENV = 'dev' } = process.env;
-
-console.log(proxy[REACT_APP_ENV as keyof typeof proxy], 'process.env');
+const { REACT_APP_ENV = 'dev', NODE_ENV = 'development' } = process.env;
 
 /**
  * @name 使用公共路径
@@ -16,12 +15,15 @@ console.log(proxy[REACT_APP_ENV as keyof typeof proxy], 'process.env');
  * @doc https://umijs.org/docs/api/config#publicpath
  */
 const PUBLIC_PATH: string = '/';
+
+const isProd = NODE_ENV === 'production'
 export default defineConfig({
   /**
    * @name 开启 hash 模式
    * @description 让 build 之后的产物包含 hash 后缀。通常用于增量发布和避免浏览器加载缓存。
    * @doc https://umijs.org/docs/api/config#hash
    */
+  extraBabelPlugins: [isProd ? 'transform-remove-console' : ''],
   hash: true,
   history: {
     type: defaultSettings.historyType,
@@ -173,4 +175,65 @@ export default defineConfig({
     'process.env.CI': process.env.CI,
   },
   tailwindcss: {},
+
+  chainWebpack: function (config, { webpack }) {
+    config.merge({
+      optimization: {
+        splitChunks: {
+          chunks: 'all',
+          minSize: 30000,
+          // 共享该module的最小 chunk数量
+          minChunks: 2,
+          // 最多异步加载该模块
+          maxAsyncRequests: 10,
+          automaticNameDelimiter: '.',
+          // 根据被提取的 chunk 自动生成
+          name: true,
+          cacheGroups: {
+            antd: {
+              name: 'antd',
+              test({ resource }: any): boolean {
+                return (
+                  /[\\/]node_modules[\\/]@ant-design[\\/]/.test(resource) ||
+                  /[\\/]node_modules[\\/]antd.*[\\/]/.test(resource)
+                );
+              },
+              minChunks: 2,
+              reuseExistingChunk: true,
+              priority: 30,
+            },
+            antv: {
+              name: 'antv',
+              test({ resource }: any): boolean {
+                return /[\\/]node_modules[\\/]@antv[\\/]/.test(resource);
+              },
+              minChunks: 2,
+              reuseExistingChunk: true,
+              priority: 20,
+            },
+            vendor: {
+              name: 'vendors',
+              test({ resource }: any): boolean {
+                return /[\\/]node_modules[\\/]/.test(resource);
+              },
+              minChunks: 2,
+              reuseExistingChunk: true,
+              priority: 10,
+            },
+          },
+        },
+      },
+    });
+    //在生产环境开启gzip压缩
+    if (isProd) {
+      // Gzip压缩
+      config.plugin('compression-webpack-plugin').use(CompressionPlugin, [
+        {
+          test: /\.(js|css|html)$/i, // 匹配
+          threshold: 10240, // 超过10k的文件压缩
+          deleteOriginalAssets: false, // 不删除源文件
+        },
+      ])
+    }
+  }
 });
