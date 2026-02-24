@@ -2,10 +2,10 @@
 
 import { join } from 'node:path';
 import { defineConfig } from '@umijs/max';
+import CompressionPlugin from 'compression-webpack-plugin';
 import defaultSettings from './defaultSettings';
 import proxy from './proxy';
 import routes from './routes';
-import CompressionPlugin from 'compression-webpack-plugin'
 
 const { REACT_APP_ENV = 'dev', NODE_ENV = 'development' } = process.env;
 
@@ -16,7 +16,7 @@ const { REACT_APP_ENV = 'dev', NODE_ENV = 'development' } = process.env;
  */
 const PUBLIC_PATH: string = '/';
 
-const isProd = NODE_ENV === 'production'
+const isProd = NODE_ENV === 'production';
 export default defineConfig({
   /**
    * @name 开启 hash 模式
@@ -176,7 +176,7 @@ export default defineConfig({
   },
   tailwindcss: {},
 
-  chainWebpack: function (config, { webpack }) {
+  chainWebpack: (config, { webpack }) => {
     config.merge({
       optimization: {
         splitChunks: {
@@ -233,7 +233,7 @@ export default defineConfig({
           threshold: 10240, // 超过10k的文件压缩
           deleteOriginalAssets: false, // 不删除源文件
         },
-      ])
+      ]);
     }
-  }
+  },
 });
