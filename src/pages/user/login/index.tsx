@@ -1,26 +1,18 @@
 import {
   AlipayCircleOutlined,
   LockOutlined,
-  MobileOutlined,
   TaobaoCircleOutlined,
   UserOutlined,
   WeiboCircleOutlined,
 } from '@ant-design/icons';
-import {
-  LoginForm,
-  ProFormCaptcha,
-  ProFormCheckbox,
-  ProFormText,
-} from '@ant-design/pro-components';
+import { LoginForm, ProFormText } from '@ant-design/pro-components';
 import { Helmet, history, useModel } from '@umijs/max';
-import { Alert, App, Tabs } from 'antd';
+import { Alert, App } from 'antd';
 import { createStyles } from 'antd-style';
 import { parse } from 'query-string';
 import React, { useState } from 'react';
-import { useAliveController } from 'react-activation';
 import { flushSync } from 'react-dom';
 import { Footer } from '@/components';
-import { getFakeCaptcha } from '@/services/ant-design-pro/login';
 import { login } from '@/services/web/login';
 import { pwd } from '@/utils/Encrypt';
 import { Token, User } from '@/utils/Web';
@@ -100,7 +92,6 @@ const Login: React.FC = () => {
   const { refresh, initialState, setInitialState } = useModel('@@initialState');
   const { styles } = useStyles();
   const { message } = App.useApp();
-  // const { clear } = useAliveController();
 
   const fetchUserInfo = async () => {
     const userInfo = await initialState?.fetchUserInfo?.();
@@ -137,8 +128,6 @@ const Login: React.FC = () => {
           }
           console.log(initialState, 'initialState2');
 
-          // 清空现有的tab缓存
-          // clear();
           // 缓存用户信息
           User.set(JSON.stringify(remoteUser));
           // 缓存token
