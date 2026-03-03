@@ -51,6 +51,8 @@ export default defineConfig({
    */
   // umi routes: https://umijs.org/docs/routing
   routes,
+  // 启用约定式布局，使 src/layouts/index.tsx 生效
+  conventionLayout: true,
   /**
    * @name 主题的配置
    * @description 虽然叫主题，但是其实只是 less 的变量设置
@@ -91,13 +93,12 @@ export default defineConfig({
   initialState: {},
   /**
    * @name layout 插件
+   * @description 设为 false 禁用 Umi 自带的 Pro Layout，改用 layouts 中的自定义 ProLayout
    * @doc https://umijs.org/docs/max/layout-menu
    */
   title: 'Ant Design Pro',
-  layout: {
-    locale: true,
-    ...defaultSettings,
-  },
+
+  layout: false,
   /**
    * @name moment2dayjs 插件
    * @description 将项目中的 moment 替换为 dayjs
@@ -169,7 +170,6 @@ export default defineConfig({
    */
   mako: {},
   esbuildMinifyIIFE: true,
-  conventionLayout: false,
   requestRecord: {},
   exportStatic: {},
   define: {
@@ -177,7 +177,7 @@ export default defineConfig({
   },
   tailwindcss: {},
 
-  chainWebpack: (config, { webpack }) => {
+  chainWebpack: (config: any) => {
     config.merge({
       optimization: {
         splitChunks: {
@@ -230,6 +230,7 @@ export default defineConfig({
       // Gzip压缩
       config.plugin('compression-webpack-plugin').use(CompressionPlugin, [
         {
+          algorithm: 'gzip',
           test: /\.(js|css|html)$/i, // 匹配
           threshold: 10240, // 超过10k的文件压缩
           deleteOriginalAssets: false, // 不删除源文件

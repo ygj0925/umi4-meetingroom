@@ -48,8 +48,8 @@ const Settings: ProjectSetting & {
   i18n: true,
   websocket: false,
   defaultLocal: 'zh-CN',
-  waterMark: false,
-  multiTab: false,
+  waterMark: true,
+  multiTab: true,
   storageOptions: {
     namespace: process.env.namespaceName as string,
     storage: 'local',

@@ -41,6 +41,7 @@ export default [
         name: '监控页',
         icon: 'smile',
         path: '/dashboard/monitor',
+        menuRender: true,
         component: './dashboard/monitor',
       },
       {
