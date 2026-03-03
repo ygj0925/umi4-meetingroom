@@ -1,4 +1,3 @@
-// src/models/counterModel.ts
 import { useCallback, useState } from 'react';
 
 export default function Page() {

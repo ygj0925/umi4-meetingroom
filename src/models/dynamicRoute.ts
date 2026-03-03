@@ -1,7 +1,7 @@
-// src/models/counterModel.ts
 import { useCallback, useState } from 'react';
 
-export default function Page() {
+export default function dynamicRoute() {
+  const [dynamicRoute, setDynamicRoute] = useState([]);
   const [counter, setCounter] = useState(0);
 
   const increment = useCallback(() => setCounter((c) => c + 1), []);
