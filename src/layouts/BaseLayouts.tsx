@@ -1,4 +1,3 @@
-// src/layouts/BaseLayouts.tsx
 import {
   CaretDownFilled,
   CheckCircleOutlined,
@@ -18,11 +17,16 @@ import {
   SettingDrawer,
   WaterMark,
 } from '@ant-design/pro-components';
+import type {
+    ProLayoutProps,
+    MenuDataItem,
+    Settings,
+} from '@ant-design/pro-components';
 import { css } from '@emotion/css';
 import { useModel } from '@umijs/max';
 import { Divider, Input, Popover, theme } from 'antd';
 import type { FC } from 'react';
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'umi';
 import { v4 as uuidv4 } from 'uuid';
 import { AvatarDropdown, Footer } from '@/components';
@@ -297,8 +301,22 @@ const _SearchInput = () => {
   );
 };
 
-const BaseLayouts: FC = () => {
+export type BaseLayoutProps = {
+    breadcrumbNameMap: Record<string, MenuDataItem>;
+    route: ProLayoutProps['route'] & {
+        authority: string[];
+        routes: any[];
+    };
+    settings: Settings;
+} & ProLayoutProps;
+
+const BaseLayouts: FC<BaseLayoutProps> = (props) => {
+    console.log(props, 'props')
+    const {
+        route,
+    } = props;
   const { initialState, setInitialState } = useModel('@@initialState');
+  const { dynamicRoute, firstPath, load, setLoad } = useModel('dynamicRoute');
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -306,6 +324,38 @@ const BaseLayouts: FC = () => {
     const menuRoutes = transformRoutes(routesConfig);
     return { path: '/', routes: menuRoutes };
   }, []);
+
+
+    useEffect(() => {
+        if (load) {
+            return;
+        }
+        const newRoute = { ...route };
+        newRoute.routes = [];
+        newRoute.items = [];
+
+        if (dynamicRoute && dynamicRoute.length > 0) {
+            for (let i = 0; i < dynamicRoute.length; i += 1) {
+                const menu = dynamicRoute[i];
+                newRoute.items.push(menu);
+                newRoute.routes.push(menu);
+            }
+
+            route.routes = newRoute.routes;
+            route.items = newRoute.routes;
+            setLoad(true);
+
+            if (location.pathname && location.pathname !== '/') {
+                navigate(location.pathname);
+            }
+        }
+    }, [dynamicRoute, load]);
+
+
+    if (location.pathname === '/' && firstPath && firstPath !== '/') {
+      navigate(firstPath);
+    }
+  
 
   return (
     <ProLayout
