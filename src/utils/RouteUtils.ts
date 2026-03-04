@@ -66,7 +66,7 @@ export function serializationRemoteList(
         let component: any;
         // 组件
         if (val.targetType === 1) {
-          
+          component = `./${val.uri}`;
         }
         // 内链
         else if (val.targetType === 2) {

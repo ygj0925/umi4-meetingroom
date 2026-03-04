@@ -114,8 +114,6 @@ export const requestConfig: RequestConfig = {
     (response: AxiosResponse) => {
       const { data, headers, status } = response;
 
-      console.log(response, '111');
-
       const contentType = headers?.['content-type'] || '';
 
       // 非 JSON 直接返回

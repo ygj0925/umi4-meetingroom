@@ -1,3 +1,5 @@
+import { MenuDataItem } from '@ant-design/pro-components'
+
 export default [
   {
     path: '/user',
@@ -41,7 +43,8 @@ export default [
         name: '监控页',
         icon: 'smile',
         path: '/dashboard/monitor',
-        menuRender: true,
+        hideChildrenInMenu: true,
+        hideInMenu: true,
         component: './dashboard/monitor',
       },
       {
@@ -216,6 +219,5 @@ export default [
       },
     ],
   },
-  { path: '/', redirect: '/dashboard/analysis' },
   { component: '404', path: '/*' },
 ];

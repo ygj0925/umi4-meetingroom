@@ -2,7 +2,8 @@ import { useCallback, useState, useEffect } from 'react';
 import { useModel, useRequest } from '@umijs/max'
 import { router } from '@/services/web/login';
 import { isLogin } from '@/utils/Web';
-
+import { serializationRemoteList } from '@/utils/RouteUtils';
+import type { MenuDataItem } from '@ant-design/pro-components';
 const getFirstUrl = (menuArray: any[]): string | undefined => {
   for (let index = 0; index < menuArray.length; index += 1) {
     const menu: any = menuArray[index];
@@ -39,8 +40,9 @@ export default function dynamicRoute() {
     onSuccess: (res: any) => {
       const list = res?.data ?? res ?? [];
       const arr = Array.isArray(list) ? list : [];
-      setDynamicRoute(arr);
-      setMenuFirst(getFirstUrl(arr));
+      const routerArr = serializationRemoteList(arr, 0, '');
+      setDynamicRoute(routerArr);
+      setMenuFirst(getFirstUrl(routerArr));
     },
   });
 

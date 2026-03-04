@@ -51,7 +51,8 @@ function transformRoutes(routes: any[]): any[] {
       (r) =>
         r.layout !== false &&
         r.path !== '/user' &&
-        !r.component?.includes('404'),
+        !r.component?.includes('404') &&
+        r.hideInMenu !== true,
     )
     .map((route) => {
       const { path, name, icon, routes: children } = route;
@@ -334,28 +335,73 @@ const BaseLayouts: FC<BaseLayoutProps> = (props) => {
         newRoute.routes = [];
         newRoute.items = [];
 
-        if (dynamicRoute && dynamicRoute.length > 0) {
-            for (let i = 0; i < dynamicRoute.length; i += 1) {
-                const menu = dynamicRoute[i];
-                newRoute.items.push(menu);
-                newRoute.routes.push(menu);
-            }
+        console.log(dynamicRoute, 'dynamicRoute');
+        console.log(newRoute, 'newRoute');
+        
 
-            route.routes = newRoute.routes;
-            route.items = newRoute.routes;
-            setLoad(true);
+        // if (dynamicRoute && dynamicRoute.length > 0) {
+        //     for (let i = 0; i < dynamicRoute.length; i += 1) {
+        //         const menu = dynamicRoute[i];
+        //         newRoute.items.push(menu);
+        //         newRoute.routes.push(menu);
+        //     }
 
-            if (location.pathname && location.pathname !== '/') {
-                navigate(location.pathname);
-            }
-        }
+        //     route.routes = newRoute.routes;
+        //     route.items = newRoute.routes;
+        //     setLoad(true);
+
+        //     if (location.pathname && location.pathname !== '/') {
+        //         navigate(location.pathname);
+        //     }
+        // }
     }, [dynamicRoute, load]);
 
 
     if (location.pathname === '/' && firstPath && firstPath !== '/') {
       navigate(firstPath);
     }
+
+
+    const defaultMenus = [
+      {
+        path: '/',
+        name: 'welcome',
+        icon: 'smile',
+        routes: [
+          {
+            path: '/welcome',
+            name: 'one',
+            icon: 'smile',
+            routes: [
+              {
+                path: '/welcome/Welcome',
+                name: 'two',
+                icon: 'smile',
+                component: './welcome/Welcome',
+                exact: true,
+              },
+            ],
+          },
+        ],
+      },
+      {
+        path: '/demo',
+        name: 'demo',
+        icon: 'profile',
+        component: './dashboard/workplace',
+      },
+    ];
+    
+    const loopMenuItem = (menus: any[]): MenuDataItem[] =>
+      menus.map(({ icon, routes, ...item }) => ({
+        ...item,
+        icon: icon && iconMap[icon as 'smile'],
+        children: routes && loopMenuItem(routes),
+      }));
   
+
+      console.log(loopMenuItem(defaultMenus), 'loopMenuItem(defaultMenus)');
+      
 
   return (
     <ProLayout
@@ -417,6 +463,7 @@ const BaseLayouts: FC<BaseLayoutProps> = (props) => {
         },
       ]}
       route={routeConfig}
+      menu={{ request: async () => loopMenuItem(defaultMenus) }}
       navTheme="light"
       layout={defaultSettings.layout as 'top' | 'side' | 'mix'}
       contentWidth={defaultSettings.contentWidth as 'Fluid' | 'Fixed'}
