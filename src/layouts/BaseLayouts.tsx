@@ -38,6 +38,11 @@ import Icon from '@/components/Icon';
 import { LayoutSetting } from '@/utils/Web';
 import defaultSettings from '../../config/defaultSettings';
 import routesConfig from '../../config/routes';
+import { createFromIconfontCN } from '@ant-design/icons';
+
+const IconFont = createFromIconfontCN({
+  scriptUrl: '//at.alicdn.com/t/font_8d5l8fzk5b87iudi.js',
+});
 
 const iconMap: Record<string, React.ReactNode> = {
   dashboard: <DashboardOutlined />,
@@ -265,7 +270,7 @@ const MenuCard = () => {
   );
 };
 
-const _SearchInput = () => {
+const SearchInput = () => {
   const { token } = theme.useToken();
   return (
     <div
@@ -274,6 +279,7 @@ const _SearchInput = () => {
       style={{
         display: 'flex',
         alignItems: 'center',
+        color: token.colorPrimary,
         marginInlineEnd: 24,
       }}
       onMouseDown={(e) => {
@@ -290,7 +296,7 @@ const _SearchInput = () => {
         prefix={
           <SearchOutlined
             style={{
-              color: token.colorTextLightSolid,
+              color: token.colorPrimary,
             }}
           />
         }
@@ -368,52 +374,11 @@ const BaseLayouts: FC<BaseLayoutProps> = (props) => {
     const renderMenuItem = (title: string, hasSub: boolean, icon?: string) => {
       return (
         <span className="ant-pro-menu-item" title={title}>
-          {!icon ? undefined : <Icon type={icon} />}
+          {/* {!icon ? undefined : <Icon type={icon} />} */}
           <span className="ant-pro-menu-item-title">{title}</span>
         </span>
       );
     };
-
-
-    const defaultMenus = [
-      {
-        path: '/',
-        name: 'welcome',
-        icon: 'smile',
-        routes: [
-          {
-            path: '/welcome',
-            name: 'one',
-            icon: 'smile',
-            routes: [
-              {
-                path: '/welcome/Welcome',
-                name: 'two',
-                icon: 'smile',
-                component: './welcome/Welcome',
-              },
-            ],
-          },
-        ],
-      },
-      {
-        path: '/demo',
-        name: 'demo',
-        icon: 'profile',
-        component: './dashboard/workplace',
-      },
-    ];
-    
-    const loopMenuItem = (menus: any[]): MenuDataItem[] =>
-      menus.map(({ icon, routes, ...item }) => ({
-        ...item,
-        icon: icon && iconMap[icon as 'smile'],
-        children: routes && loopMenuItem(routes),
-      }));
-  
-
-      console.log(loopMenuItem(defaultMenus), 'loopMenuItem(defaultMenus)');
-      
 
   return (
     <ProLayout
@@ -474,8 +439,9 @@ const BaseLayouts: FC<BaseLayoutProps> = (props) => {
           url: 'https://d.umijs.org/zh-CN',
         },
       ]}
+      appListRender={()=> <AppListRender />}
       route={routeConfig}
-      menu={{ request: async () => dynamicRoute }}
+      // menu={{ request: async () => dynamicRoute }}
       navTheme="light"
       layout={defaultSettings.layout as 'top' | 'side' | 'mix'}
       contentWidth={defaultSettings.contentWidth as 'Fluid' | 'Fixed'}
@@ -498,40 +464,21 @@ const BaseLayouts: FC<BaseLayoutProps> = (props) => {
           </>
         );
       }}
+    
+      menuItemRender={(item, dom) => {
+        if (item.path && location.pathname !== item.path) {
+          return <Link to={item.path}> {!item.icon? null : <IconFont type={'icon-' + item.icon as string} />}{item.name}</Link>;
+        }
+        return dom;
+      }}
       fixedHeader={defaultSettings.fixedHeader}
       fixSiderbar={defaultSettings.fixSiderbar}
-      siderWidth={256}
+      siderWidth={236}
       actionsRender={(props) => {
         if (props.isMobile) return [];
         return [
           props.layout !== 'side' ? (
-            <div
-              key="SearchOutlined"
-              aria-hidden
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                marginInlineEnd: 24,
-              }}
-              onMouseDown={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-              }}
-            >
-              <Input
-                style={{
-                  borderRadius: 4,
-                  marginInlineEnd: 12,
-                  backgroundColor: 'rgba(0,0,0,0.03)',
-                }}
-                prefix={
-                  <SearchOutlined/>
-                }
-                placeholder="搜索方案"
-                variant="borderless"
-              />
-              <PlusCircleFilled/>
-            </div>
+            <SearchInput />
           ) : undefined,
           <InfoCircleFilled key="InfoCircleFilled" />,
           <QuestionCircleFilled key="QuestionCircleFilled" />,
@@ -547,28 +494,7 @@ const BaseLayouts: FC<BaseLayoutProps> = (props) => {
         e?.stopPropagation?.();
         navigate('/');
       }}
-      subMenuItemRender={(item) => {
-        const { title, icon } = item.meta;
-        return renderMenuItem(title, true, icon);
-      }}
-      menuItemRender={(menuItemProps) => {
-        const { redirectPath, title, icon } = menuItemProps.meta;
-        if (!menuItemProps.path || location.pathname === menuItemProps.path) {
-          return renderMenuItem(title, false, icon);
-        }
-
-        if (menuItemProps.isUrl) {
-          return (
-            <a target={menuItemProps.target} href={menuItemProps.path}>
-              {renderMenuItem(title, false, icon)}
-            </a>
-          );
-        }
-
-        return (
-          <Link to={redirectPath || menuItemProps.path}>{renderMenuItem(title, false, icon)}</Link>
-        );
-      }}
+      
       breadcrumbRender={(routers) =>
         routers?.map((r) => ({
           path: r.path,

@@ -1,4 +1,3 @@
-import { MenuDataItem } from '@ant-design/pro-components'
 
 export default [
   {
@@ -49,7 +48,7 @@ export default [
       },
       {
         name: '工作台',
-        icon: 'smile',
+        icon: '<UpCircleOutlined />',
         path: '/dashboard/workplace',
         component: './dashboard/workplace',
       },
