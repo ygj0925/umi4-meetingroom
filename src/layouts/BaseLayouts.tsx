@@ -10,6 +10,9 @@ import {
   SmileOutlined,
   TableOutlined,
   UserOutlined,
+  InfoCircleFilled,
+  QuestionCircleFilled,
+  GithubFilled,
   WarningOutlined,
 } from '@ant-design/icons';
 import {
@@ -30,6 +33,8 @@ import React, { useMemo, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'umi';
 import { v4 as uuidv4 } from 'uuid';
 import { AvatarDropdown, Footer } from '@/components';
+import AppListRender from '@/components/AppListRender'
+import Icon from '@/components/Icon';
 import { LayoutSetting } from '@/utils/Web';
 import defaultSettings from '../../config/defaultSettings';
 import routesConfig from '../../config/routes';
@@ -312,7 +317,6 @@ export type BaseLayoutProps = {
 } & ProLayoutProps;
 
 const BaseLayouts: FC<BaseLayoutProps> = (props) => {
-    console.log(props, 'props')
     const {
         route,
     } = props;
@@ -361,6 +365,15 @@ const BaseLayouts: FC<BaseLayoutProps> = (props) => {
       navigate(firstPath);
     }
 
+    const renderMenuItem = (title: string, hasSub: boolean, icon?: string) => {
+      return (
+        <span className="ant-pro-menu-item" title={title}>
+          {!icon ? undefined : <Icon type={icon} />}
+          <span className="ant-pro-menu-item-title">{title}</span>
+        </span>
+      );
+    };
+
 
     const defaultMenus = [
       {
@@ -378,7 +391,6 @@ const BaseLayouts: FC<BaseLayoutProps> = (props) => {
                 name: 'two',
                 icon: 'smile',
                 component: './welcome/Welcome',
-                exact: true,
               },
             ],
           },
@@ -463,15 +475,15 @@ const BaseLayouts: FC<BaseLayoutProps> = (props) => {
         },
       ]}
       route={routeConfig}
-      menu={{ request: async () => loopMenuItem(defaultMenus) }}
+      menu={{ request: async () => dynamicRoute }}
       navTheme="light"
       layout={defaultSettings.layout as 'top' | 'side' | 'mix'}
       contentWidth={defaultSettings.contentWidth as 'Fluid' | 'Fixed'}
       headerTitleRender={(logo, title, _) => {
         const defaultDom = (
           <a>
-            {logo}
             {title}
+            {logo}
           </a>
         );
         if (typeof window === 'undefined') return defaultDom;
@@ -489,15 +501,73 @@ const BaseLayouts: FC<BaseLayoutProps> = (props) => {
       fixedHeader={defaultSettings.fixedHeader}
       fixSiderbar={defaultSettings.fixSiderbar}
       siderWidth={256}
+      actionsRender={(props) => {
+        if (props.isMobile) return [];
+        return [
+          props.layout !== 'side' ? (
+            <div
+              key="SearchOutlined"
+              aria-hidden
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                marginInlineEnd: 24,
+              }}
+              onMouseDown={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+              }}
+            >
+              <Input
+                style={{
+                  borderRadius: 4,
+                  marginInlineEnd: 12,
+                  backgroundColor: 'rgba(0,0,0,0.03)',
+                }}
+                prefix={
+                  <SearchOutlined/>
+                }
+                placeholder="搜索方案"
+                variant="borderless"
+              />
+              <PlusCircleFilled/>
+            </div>
+          ) : undefined,
+          <InfoCircleFilled key="InfoCircleFilled" />,
+          <QuestionCircleFilled key="QuestionCircleFilled" />,
+          <GithubFilled key="GithubFilled" />,
+        ];
+      }}
+      avatarProps={{
+        src: 'https://gw.alipayobjects.com/zos/antfincdn/efFD%24IOql2/weixintupian_20170331104822.jpg',
+        size: 'small',
+        title: '七妮妮',
+      }}
       onMenuHeaderClick={(e) => {
         e?.stopPropagation?.();
         navigate('/');
       }}
-      menuItemRender={(item, dom) => {
-        if (item.path && location.pathname !== item.path) {
-          return <Link to={item.path}>{dom}</Link>;
+      subMenuItemRender={(item) => {
+        const { title, icon } = item.meta;
+        return renderMenuItem(title, true, icon);
+      }}
+      menuItemRender={(menuItemProps) => {
+        const { redirectPath, title, icon } = menuItemProps.meta;
+        if (!menuItemProps.path || location.pathname === menuItemProps.path) {
+          return renderMenuItem(title, false, icon);
         }
-        return dom;
+
+        if (menuItemProps.isUrl) {
+          return (
+            <a target={menuItemProps.target} href={menuItemProps.path}>
+              {renderMenuItem(title, false, icon)}
+            </a>
+          );
+        }
+
+        return (
+          <Link to={redirectPath || menuItemProps.path}>{renderMenuItem(title, false, icon)}</Link>
+        );
       }}
       breadcrumbRender={(routers) =>
         routers?.map((r) => ({
@@ -505,14 +575,7 @@ const BaseLayouts: FC<BaseLayoutProps> = (props) => {
           breadcrumbName: r.breadcrumbName || (r.title as string),
         }))
       }
-      rightContentRender={() => (
-        <AvatarDropdown menu>
-          <span style={{ marginLeft: 8, cursor: 'pointer' }}>
-            {(initialState as any)?.user?.name ?? '未登录'}
-          </span>
-        </AvatarDropdown>
-      )}
-      footerRender={() => <Footer />}
+  
       {...initialState?.settings}
     >
       <WaterMark
