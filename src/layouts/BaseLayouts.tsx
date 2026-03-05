@@ -435,7 +435,7 @@ const BaseLayouts: FC<BaseLayoutProps> = (props) => {
           url: 'https://d.umijs.org/zh-CN',
         },
       ]}
-      appListRender={()=> <AppListRender />}
+      // appListRender={()=> <AppListRender />}
       route={routeConfig}
       menu={{ request: async () => dynamicRoute }}
       navTheme="light"
@@ -444,8 +444,8 @@ const BaseLayouts: FC<BaseLayoutProps> = (props) => {
       headerTitleRender={(logo, title, _) => {
         const defaultDom = (
           <a>
-            {title}
             {logo}
+            {title}
           </a>
         );
         if (typeof window === 'undefined') return defaultDom;
