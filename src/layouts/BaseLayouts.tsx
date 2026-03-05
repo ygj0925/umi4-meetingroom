@@ -363,9 +363,14 @@ const BaseLayouts: FC<BaseLayoutProps> = (props) => {
     }, [dynamicRoute, load]);
 
 
-    if (location.pathname === '/' && firstPath && firstPath !== '/') {
-      history.push(firstPath)
-    }
+   
+
+    useEffect(() => {
+      if (location.pathname === '/' && firstPath && firstPath !== '/') {
+        history.push(firstPath)
+      }
+    }, [location.pathname]);
+  
 
     const renderMenuItem = (title: string, hasSub: boolean, icon?: string) => {
       return (
@@ -437,7 +442,7 @@ const BaseLayouts: FC<BaseLayoutProps> = (props) => {
       ]}
       // appListRender={()=> <AppListRender />}
       route={routeConfig}
-      menu={{ request: async () => dynamicRoute }}
+      // menu={{ request: async () => dynamicRoute }}
       navTheme="light"
       layout={defaultSettings.layout as 'top' | 'side' | 'mix'}
       contentWidth={defaultSettings.contentWidth as 'Fluid' | 'Fixed'}

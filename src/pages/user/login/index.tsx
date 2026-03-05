@@ -12,7 +12,7 @@ import { createStyles } from 'antd-style';
 import { parse } from 'query-string';
 import React from 'react';
 import { flushSync } from 'react-dom';
-import { Footer } from '@/components';
+import Footer from '@/components/Footer';
 import { login } from '@/services/web/login';
 import { pwd } from '@/utils/Encrypt';
 import { Token, User } from '@/utils/Web';
