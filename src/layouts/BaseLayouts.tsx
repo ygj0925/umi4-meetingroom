@@ -26,13 +26,14 @@ import type {
     Settings,
 } from '@ant-design/pro-components';
 import { css } from '@emotion/css';
-import { useModel } from '@umijs/max';
+import { useModel, history } from '@umijs/max';
 import { Divider, Input, Popover, theme } from 'antd';
 import type { FC } from 'react';
 import React, { useMemo, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'umi';
 import { v4 as uuidv4 } from 'uuid';
-import { AvatarDropdown, Footer } from '@/components';
+import Footer from '@/components/Footer/index';
+import { AvatarDropdown } from '@/components';
 import AppListRender from '@/components/AppListRender'
 import Icon from '@/components/Icon';
 import { LayoutSetting } from '@/utils/Web';
@@ -323,13 +324,9 @@ export type BaseLayoutProps = {
 } & ProLayoutProps;
 
 const BaseLayouts: FC<BaseLayoutProps> = (props) => {
-    const {
-        route,
-    } = props;
   const { initialState, setInitialState } = useModel('@@initialState');
   const { dynamicRoute, firstPath, load, setLoad } = useModel('dynamicRoute');
   const location = useLocation();
-  const navigate = useNavigate();
 
   const routeConfig = useMemo(() => {
     const menuRoutes = transformRoutes(routesConfig);
@@ -341,10 +338,9 @@ const BaseLayouts: FC<BaseLayoutProps> = (props) => {
         if (load) {
             return;
         }
-        const newRoute = { ...route };
-        newRoute.routes = [];
-        newRoute.items = [];
-
+        const menuRoutes = transformRoutes(routesConfig);
+        const newRoute = { ...menuRoutes };
+      
         console.log(dynamicRoute, 'dynamicRoute');
         console.log(newRoute, 'newRoute');
         
@@ -361,14 +357,14 @@ const BaseLayouts: FC<BaseLayoutProps> = (props) => {
         //     setLoad(true);
 
         //     if (location.pathname && location.pathname !== '/') {
-        //         navigate(location.pathname);
+        //         history.replace(location.pathname);
         //     }
         // }
     }, [dynamicRoute, load]);
 
 
     if (location.pathname === '/' && firstPath && firstPath !== '/') {
-      navigate(firstPath);
+      history.push(firstPath)
     }
 
     const renderMenuItem = (title: string, hasSub: boolean, icon?: string) => {
@@ -441,7 +437,7 @@ const BaseLayouts: FC<BaseLayoutProps> = (props) => {
       ]}
       appListRender={()=> <AppListRender />}
       route={routeConfig}
-      // menu={{ request: async () => dynamicRoute }}
+      menu={{ request: async () => dynamicRoute }}
       navTheme="light"
       layout={defaultSettings.layout as 'top' | 'side' | 'mix'}
       contentWidth={defaultSettings.contentWidth as 'Fluid' | 'Fixed'}
@@ -467,13 +463,14 @@ const BaseLayouts: FC<BaseLayoutProps> = (props) => {
     
       menuItemRender={(item, dom) => {
         if (item.path && location.pathname !== item.path) {
-          return <Link to={item.path}> {!item.icon? null : <IconFont type={'icon-' + item.icon as string} />}{item.name}</Link>;
+          return <Link to={item.path}>{dom}</Link>;
         }
         return dom;
       }}
       fixedHeader={defaultSettings.fixedHeader}
       fixSiderbar={defaultSettings.fixSiderbar}
       siderWidth={236}
+      footerRender={() => <Footer />}
       actionsRender={(props) => {
         if (props.isMobile) return [];
         return [
@@ -490,9 +487,14 @@ const BaseLayouts: FC<BaseLayoutProps> = (props) => {
         size: 'small',
         title: '七妮妮',
       }}
+      headerContentRender={() => {
+        return (
+          <AvatarDropdown />
+        );
+      }}
       onMenuHeaderClick={(e) => {
         e?.stopPropagation?.();
-        navigate('/');
+        history.push('/');
       }}
       
       breadcrumbRender={(routers) =>
