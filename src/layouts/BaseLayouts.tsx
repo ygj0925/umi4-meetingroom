@@ -442,7 +442,8 @@ const BaseLayouts: FC<BaseLayoutProps> = (props) => {
       ]}
       // appListRender={()=> <AppListRender />}
       route={routeConfig}
-      // menu={{ request: async () => dynamicRoute }}
+      // route={dynamicRoute}
+      menu={{ request: async () => dynamicRoute }}
       navTheme="light"
       layout={defaultSettings.layout as 'top' | 'side' | 'mix'}
       contentWidth={defaultSettings.contentWidth as 'Fluid' | 'Fixed'}
