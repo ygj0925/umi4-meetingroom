@@ -36,7 +36,8 @@ import Footer from '@/components/Footer/index';
 import { AvatarDropdown } from '@/components';
 import AppListRender from '@/components/AppListRender'
 import Icon from '@/components/Icon';
-import { LayoutSetting } from '@/utils/Web';
+import { LayoutSetting, isLogin } from '@/utils/Web';
+import Notify from '@/utils/NotifyUtils'
 import defaultSettings from '../../config/defaultSettings';
 import routesConfig from '../../config/routes';
 import { createFromIconfontCN } from '@ant-design/icons';
@@ -443,35 +444,42 @@ const BaseLayouts: FC<BaseLayoutProps> = (props) => {
       // appListRender={()=> <AppListRender />}
       route={routeConfig}
       // route={dynamicRoute}
-      menu={{ request: async () => dynamicRoute }}
+      // menu={{ request: async () => dynamicRoute }}
       navTheme="light"
       layout={defaultSettings.layout as 'top' | 'side' | 'mix'}
       contentWidth={defaultSettings.contentWidth as 'Fluid' | 'Fixed'}
-      headerTitleRender={(logo, title, _) => {
-        const defaultDom = (
-          <a>
-            {logo}
-            {title}
-          </a>
-        );
-        if (typeof window === 'undefined') return defaultDom;
-        if (document.body.clientWidth < 1400) {
-          return defaultDom;
-        }
-        if (_.isMobile) return defaultDom;
-        return (
-          <>
-            {defaultDom}
-            <MenuCard />
-          </>
-        );
-      }}
+      // headerTitleRender={(logo, title, _) => {
+      //   const defaultDom = (
+      //     <a>
+      //       {logo}
+      //       {title}
+      //     </a>
+      //   );
+      //   if (typeof window === 'undefined') return defaultDom;
+      //   if (document.body.clientWidth < 1400) {
+      //     return defaultDom;
+      //   }
+      //   if (_.isMobile) return defaultDom;
+      //   return (
+      //     <>
+      //       {defaultDom}
+      //       <MenuCard />
+      //     </>
+      //   );
+      // }}
     
       menuItemRender={(item, dom) => {
         if (item.path && location.pathname !== item.path) {
           return <Link to={item.path}>{dom}</Link>;
         }
         return dom;
+      }}
+      onPageChange={async () => {
+        // 如果没有登录，重定向到 login
+        alert(1111)
+        if (!isLogin(initialState)) {
+          Notify.logout();
+        }
       }}
       fixedHeader={defaultSettings.fixedHeader}
       fixSiderbar={defaultSettings.fixSiderbar}
