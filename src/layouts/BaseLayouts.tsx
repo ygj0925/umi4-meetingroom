@@ -1,28 +1,29 @@
-import React, { FC, useEffect, useMemo } from 'react'
-import { Divider, Input, Popover, theme } from 'antd';
 import {
-  ProLayout,
-  SettingDrawer,
-  WaterMark,
-} from '@ant-design/pro-components'
-
+  DashboardOutlined,
+  FormOutlined,
+  SmileOutlined,
+  TableOutlined,
+  UserOutlined,
+  WarningOutlined,
+} from '@ant-design/icons';
 import type {
   MenuDataItem,
   ProLayoutProps,
   Settings,
-} from '@ant-design/pro-components'
-
-import { history, Link, Outlet, useLocation, useModel } from '@umijs/max'
-import { css } from '@emotion/css'
-import { v4 as uuidv4 } from 'uuid';
-import defaultSettings from '../../config/defaultSettings'
-import routesConfig from '../../config/routes'
-import Footer from '@/components/Footer'
-import AppListRender from '@/components/AppListRender'
-import { AvatarDropdown } from '@/components';
-import HeaderDropdown from '@/components/HeaderDropdown'
-import { isLogin, LayoutSetting } from '@/utils/Web'
-import { CaretDownFilled, CheckCircleOutlined, DashboardOutlined, DoubleRightOutlined, FormOutlined, PlusCircleFilled, ProfileOutlined, SearchOutlined, SmileOutlined, TableOutlined, UserOutlined, InfoCircleFilled, QuestionCircleFilled, GithubFilled, WarningOutlined, } from '@ant-design/icons';
+} from '@ant-design/pro-components';
+import {
+  ProLayout,
+  SettingDrawer,
+  WaterMark,
+} from '@ant-design/pro-components';
+import { css } from '@emotion/css';
+import { history, Link, Outlet, useLocation, useModel } from '@umijs/max';
+import { theme } from 'antd';
+import React, { type FC, useEffect, useMemo } from 'react';
+import defaultSettings from '@/../config/defaultSettings';
+import routesConfig from '@/../config/routes';
+import Footer from '@/components/Footer';
+import { isLogin } from '@/utils/Web';
 
 /**
  * icon 映射
@@ -35,7 +36,7 @@ const iconMap: Record<string, React.ReactNode> = {
   form: <FormOutlined />,
   smile: <SmileOutlined />,
   warning: <WarningOutlined />,
-}
+};
 
 /**
  * 路由 -> 菜单转换
@@ -44,71 +45,28 @@ const iconMap: Record<string, React.ReactNode> = {
 function transformRoutes(routes: any[]): MenuDataItem[] {
   return routes
     .filter((r) => {
-      if (r.layout === false) return false
-      if (r.hideInMenu) return false
-      if (!r.path) return false
-      return true
+      if (r.layout === false) return false;
+      if (r.hideInMenu) return false;
+      if (!r.path) return false;
+      return true;
     })
     .map((route) => {
       const item: MenuDataItem = {
         path: route.path,
         name: route.name,
-      }
+      };
 
       if (route.icon && iconMap[route.icon]) {
-        item.icon = iconMap[route.icon]
+        item.icon = iconMap[route.icon];
       }
 
       if (route.routes) {
-        item.children = transformRoutes(route.routes)
+        item.children = transformRoutes(route.routes);
       }
 
-      return item
-    })
+      return item;
+    });
 }
-
-const SearchInput = () => {
-  const { token } = theme.useToken();
-  return (
-    <div
-      key="SearchOutlined"
-      aria-hidden
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        color: token.colorPrimary,
-        marginInlineEnd: 24,
-      }}
-      onMouseDown={(e) => {
-        e.stopPropagation();
-        e.preventDefault();
-      }}
-    >
-      <Input
-        style={{
-          borderRadius: 4,
-          marginInlineEnd: 12,
-          backgroundColor: token.colorBgTextHover,
-        }}
-        prefix={
-          <SearchOutlined
-            style={{
-              color: token.colorPrimary,
-            }}
-          />
-        }
-        placeholder="搜索方案"
-        variant="borderless"
-      />
-      <PlusCircleFilled
-        style={{
-          color: token.colorPrimary,
-          fontSize: 24,
-        }}
-      />
-    </div>
-  );
-};
 
 /**
  * BaseLayout Props
@@ -116,36 +74,36 @@ const SearchInput = () => {
 
 export type BaseLayoutProps = {
   route: ProLayoutProps['route'] & {
-    authority: string[]
-    routes: any[]
-  }
+    authority: string[];
+    routes: any[];
+  };
 
-  settings: Settings
-  breadcrumbNameMap: Record<string, MenuDataItem>
-} & ProLayoutProps
+  settings: Settings;
+  breadcrumbNameMap: Record<string, MenuDataItem>;
+} & ProLayoutProps;
 
 /**
  * BaseLayout
  */
 
 const BaseLayout: FC<BaseLayoutProps> = (props) => {
-  const location = useLocation()
+  const location = useLocation();
 
-  const { initialState, setInitialState } = useModel('@@initialState')
+  const { initialState, setInitialState } = useModel('@@initialState');
 
   /**
    * 动态菜单 model
    */
 
-  const { dynamicRoute, firstPath } = useModel('dynamicRoute')
+  const { dynamicRoute, firstPath } = useModel('dynamicRoute');
 
   /**
    * 静态菜单
    */
 
   const staticMenus = useMemo(() => {
-    return transformRoutes(routesConfig)
-  }, [])
+    return transformRoutes(routesConfig);
+  }, []);
 
   /**
    * 合并菜单
@@ -153,11 +111,11 @@ const BaseLayout: FC<BaseLayoutProps> = (props) => {
 
   const menuData = useMemo(() => {
     if (!dynamicRoute?.length) {
-      return staticMenus
+      return staticMenus;
     }
 
-    return [...staticMenus, ...dynamicRoute]
-  }, [dynamicRoute, staticMenus])
+    return [...staticMenus, ...dynamicRoute];
+  }, [dynamicRoute, staticMenus]);
 
   /**
    * 自动跳转首页
@@ -165,9 +123,9 @@ const BaseLayout: FC<BaseLayoutProps> = (props) => {
 
   useEffect(() => {
     if (location.pathname === '/' && firstPath && firstPath !== '/') {
-      history.replace(firstPath)
+      history.replace(firstPath);
     }
-  }, [location.pathname, firstPath])
+  }, [location.pathname, firstPath]);
 
   /**
    * 路由变化
@@ -175,9 +133,9 @@ const BaseLayout: FC<BaseLayoutProps> = (props) => {
 
   const handlePageChange = () => {
     if (!isLogin(initialState)) {
-      history.push('/user/login')
+      history.push('/user/login');
     }
-  }
+  };
 
   /**
    * Layout
@@ -188,9 +146,6 @@ const BaseLayout: FC<BaseLayoutProps> = (props) => {
       title={defaultSettings.title}
       logo={defaultSettings.logo}
       location={location}
-      appList={[ { icon: 'https://gw.alipayobjects.com/zos/rmsportal/KDpgvguMpGfqaHPjicRK.svg', title: 'Ant Design', desc: '杭州市较知名的 UI 设计语言', url: 'https://ant.design', }, { icon: 'https://gw.alipayobjects.com/zos/antfincdn/FLrTNDvlna/antv.png', title: 'AntV', desc: '蚂蚁集团全新一代数据可视化解决方案', url: 'https://antv.vision/', target: '_blank', }, { icon: 'https://gw.alipayobjects.com/zos/antfincdn/upvrAjAPQX/Logo_Tech%252520UI.svg', title: 'Pro Components', desc: '专业级 UI 组件库', url: 'https://procomponents.ant.design/', }, { icon: 'https://img.alicdn.com/tfs/TB1zomHwxv1gK0jSZFFXXb0sXXa-200-200.png', title: 'umi', desc: '插件化的企业级前端应用框架。', url: 'https://umijs.org/zh-CN/docs', }, { icon: 'https://gw.alipayobjects.com/zos/bmw-prod/8a74c1d3-16f3-4719-be63-15e467a68a24/km0cv8vn_w500_h500.png', title: 'qiankun', desc: '可能是你见过最完善的微前端解决方案🧐', url: 'https://qiankun.umijs.org/', }, { icon: 'https://gw.alipayobjects.com/zos/rmsportal/XuVpGqBFxXplzvLjJBZB.svg', title: '语雀', desc: '知识创作与分享工具', url: 'https://www.yuque.com/', }, { icon: 'https://gw.alipayobjects.com/zos/rmsportal/LFooOLwmxGLsltmUjTAP.svg', title: 'Kitchen ', desc: 'Sketch 工具集', url: 'https://kitchen.alipay.com/', }, { icon: 'https://gw.alipayobjects.com/zos/bmw-prod/d3e3eb39-1cd7-4aa5-827c-877deced6b7e/lalxt4g3_w256_h256.png', title: 'dumi', desc: '为组件开发场景而生的文档工具', url: 'https://d.umijs.org/zh-CN', }, ]}
-      appListRender={()=> <AppListRender />}
-      
       /**
        * 菜单
        */
@@ -202,47 +157,32 @@ const BaseLayout: FC<BaseLayoutProps> = (props) => {
       /**
        * mix = 顶部 + 左侧
        */
-      navTheme={defaultSettings.navTheme as 'realDark' | 'light' | undefined}
-      layout={defaultSettings.layout as 'top' | 'side' | 'mix'}
-      contentWidth={defaultSettings.contentWidth as 'Fluid' | 'Fixed'}
+
+      layout="mix"
       /**
        * 顶部菜单
        */
 
       splitMenus
-
       /**
        * 页面变化
        */
 
       onPageChange={handlePageChange}
-
       /**
        * 菜单点击
        */
 
       menuItemRender={(item, dom) => {
-        if (!item.path) return dom
+        if (!item.path) return dom;
 
-        return <Link to={item.path}>{dom}</Link>
+        return <Link to={item.path}>{dom}</Link>;
       }}
-
       /**
        * 顶部 actions
        */
 
-      actionsRender={(props) => {
-        if (props.isMobile) return [];
-        return [
-          props.layout !== 'side' ? (
-            <SearchInput />
-          ) : undefined,
-          <InfoCircleFilled key="InfoCircleFilled" />,
-          <QuestionCircleFilled key="QuestionCircleFilled" />,
-          <GithubFilled key="GithubFilled" />,
-        ];
-      }}
-
+      actionsRender={() => []}
       /**
        * 头像
        */
@@ -250,63 +190,52 @@ const BaseLayout: FC<BaseLayoutProps> = (props) => {
       avatarProps={{
         src: 'https://i.pravatar.cc/40',
         size: 'small',
-        title: initialState?.user?.info?.nickname,
+        title: initialState?.user?.info?.username,
       }}
-      headerContentRender={() => {
-        return (
-          <AvatarDropdown />
-        );
-      }}
-      onMenuHeaderClick={(e) => {
-        e?.stopPropagation?.();
-        history.push('/');
-      }}
-
       /**
        * footer
        */
 
       footerRender={() => <Footer />}
-
       /**
        * 侧边栏
        */
 
-      fixedHeader={defaultSettings.fixedHeader}
-      fixSiderbar={defaultSettings.fixSiderbar}
-
-      siderWidth={236}
-
+      fixSiderbar
+      fixedHeader
+      siderWidth={220}
       /**
        * breadcrumb
        */
 
-      breadcrumbRender={(routers) => routers?.map((r) => ({ path: r.path, breadcrumbName: r.breadcrumbName || (r.title as string), })) }
-
+      breadcrumbRender={(routers) =>
+        routers?.map((item) => ({
+          path: item.path,
+          breadcrumbName: item.breadcrumbName,
+        }))
+      }
       {...initialState?.settings}
     >
       <WaterMark
-        content={initialState?.user?.info?.nickname}
+        content={initialState?.user?.info?.username}
         style={{ height: '100%' }}
       >
         <Outlet />
       </WaterMark>
 
-      <SettingDrawer 
-        pathname={location.pathname} 
-        enableDarkTheme 
-        hideHintAlert
-        hideCopyButton
-        disableUrlParams
-        settings={(initialState as any)?.settings} 
-        onSettingChange={(changeSetting) => { 
-          const nextSettings = { ...initialState?.settings, ...changeSetting }; 
-          setInitialState({ ...initialState, settings: nextSettings }); 
-          LayoutSetting.set(nextSettings); 
-          }} 
+      <SettingDrawer
+        pathname={location.pathname}
+        enableDarkTheme
+        settings={initialState?.settings}
+        onSettingChange={(settings) => {
+          setInitialState({
+            ...initialState,
+            settings,
+          });
+        }}
       />
     </ProLayout>
-  )
-}
+  );
+};
 
-export default BaseLayout
+export default BaseLayout;
