@@ -34,3 +34,43 @@ export async function getInitialState(): Promise<{
 export const request: RequestConfig = {
   ...requestConfig,
 };
+
+let menuData: any[] = [];
+const menuMatch = (data: any[]) => {
+  const arr = data.map((item) => {
+    if (item.children.length) {
+      menuMatch(item.children);
+    } else {
+      item.element = (() => {
+        item.component = require(`./pages/${item.uri}`).default;
+        const PageComponent = item.component;
+        return <PageComponent />;
+      })();
+    }
+    return {
+      name: item.name,
+      element: item.element,
+      component: item.component,
+      children: item.children,
+      path: item.path,
+      icon: item.icon,
+      parentId: item.parentId,
+      id: item.id,
+      uri: item.uri,
+    };
+  });
+
+  return arr;
+};
+
+export async function pathClientRoutes({ routes }: { routes: any[] }) {
+  const arr = menuMatch(menuData);
+  routes[0].children.push(arr[0]);
+}
+
+export async function render(oldRender: () => void) {
+  const res = await fetch('/api/getMenuList');
+  const data = await res.json();
+  menuData = data.data || [];
+  oldRender();
+}

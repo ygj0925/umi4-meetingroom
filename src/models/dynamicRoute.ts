@@ -1,16 +1,20 @@
-import { useCallback, useState, useEffect } from 'react';
-import { useModel, useRequest } from '@umijs/max'
+import { useModel, useRequest } from '@umijs/max';
+import { useCallback, useEffect, useState } from 'react';
 import { router } from '@/services/web/login';
-import { isLogin } from '@/utils/Web';
 import { serializationRemoteList } from '@/utils/RouteUtils';
-import type { MenuDataItem } from '@ant-design/pro-components';
+import { isLogin } from '@/utils/Web';
+
 const getFirstUrl = (menuArray: any[]): string | undefined => {
   for (let index = 0; index < menuArray.length; index += 1) {
     const menu: any = menuArray[index];
     // 菜单未隐藏
     if (!menu?.hideInMenu) {
       // 如果存在子级 且子级的第一个菜单存在路径
-      if (menu?.children && menu?.children.length > 0 && menu?.children[0].path) {
+      if (
+        menu?.children &&
+        menu?.children.length > 0 &&
+        menu?.children[0].path
+      ) {
         const url = getFirstUrl(menu?.children);
         // 存在首页
         if (url) {
@@ -26,8 +30,6 @@ const getFirstUrl = (menuArray: any[]): string | undefined => {
 
   return undefined;
 };
-
-
 
 export default function dynamicRoute() {
   const { initialState } = useModel('@@initialState');
@@ -55,11 +57,6 @@ export default function dynamicRoute() {
       getDynamicRoute();
     }
   }, [initialState, getDynamicRoute]);
-
-  console.log(dynamicRoute, 'dynamicRoute')
-  console.log(firstPath, 'firstPath')
-  console.log(load, 'load')
-  console.log(setLoad, 'setLoad')
 
   return { dynamicRoute, firstPath, getDynamicRoute, load, setLoad };
 }
