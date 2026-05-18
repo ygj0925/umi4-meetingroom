@@ -9,6 +9,12 @@ export async function query(body?: Partial<SysOrganizationQo>) {
   });
 }
 
+export async function tree() {
+  return request<R<SysOrganizationVo[]>>('system/organization/tree', {
+    method: 'GET',
+  });
+}
+
 export async function create(body: SysOrganizationDto) {
   return request<R<any>>('system/organization', {
     method: 'POST',

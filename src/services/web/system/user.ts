@@ -6,7 +6,7 @@ import type {
   SysUserScopeDto,
   SysUserScopeVo,
   SysUserVo,
-} from '@/services/ballcat/system/typing';
+} from './typing';
 import type { PageResult, QueryParam, R } from '@/typings';
 import type { UploadFile } from 'antd/lib/upload/interface';
 
