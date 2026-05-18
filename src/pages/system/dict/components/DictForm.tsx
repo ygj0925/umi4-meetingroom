@@ -4,7 +4,8 @@ import {
   ProFormText,
   ProFormTextArea,
 } from '@ant-design/pro-components';
-import { Modal } from 'antd';
+import { useIntl } from '@umijs/max';
+import { Modal, message } from 'antd';
 import React, { useEffect } from 'react';
 import type { SysDictVo } from '@/services/web/system';
 import { dict } from '@/services/web/system';
@@ -23,6 +24,7 @@ const DictForm: React.FC<DictFormProps> = ({
   onSuccess,
 }) => {
   const [form] = ProForm.useForm();
+  const intl = useIntl();
 
   useEffect(() => {
     if (visible) {
@@ -41,6 +43,7 @@ const DictForm: React.FC<DictFormProps> = ({
       } else {
         await dict.create(values);
       }
+      message.success(intl.formatMessage({ id: 'common.operation.success' }));
       onSuccess();
     } catch (error) {
       console.error('Submit failed:', error);
@@ -49,7 +52,13 @@ const DictForm: React.FC<DictFormProps> = ({
 
   return (
     <Modal
-      title={dictData ? '编辑字典' : '新增字典'}
+      title={
+        dictData
+          ? intl.formatMessage({ id: 'common.operation.edit' }) +
+            intl.formatMessage({ id: 'system.dict.title' })
+          : intl.formatMessage({ id: 'common.operation.add' }) +
+            intl.formatMessage({ id: 'system.dict.title' })
+      }
       open={visible}
       onCancel={onCancel}
       footer={null}
@@ -62,29 +71,63 @@ const DictForm: React.FC<DictFormProps> = ({
       >
         <ProFormText
           name="code"
-          label="字典标识"
-          placeholder="请输入字典标识"
-          rules={[{ required: true, message: '请输入字典标识' }]}
+          label={intl.formatMessage({ id: 'system.dict.code' })}
+          placeholder={
+            intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+            intl.formatMessage({ id: 'system.dict.code' })
+          }
+          rules={[
+            {
+              required: true,
+              message:
+                intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+                intl.formatMessage({ id: 'system.dict.code' }),
+            },
+          ]}
           disabled={!!dictData}
         />
         <ProFormText
           name="title"
-          label="字典名称"
-          placeholder="请输入字典名称"
-          rules={[{ required: true, message: '请输入字典名称' }]}
+          label={intl.formatMessage({ id: 'system.dict.name' })}
+          placeholder={
+            intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+            intl.formatMessage({ id: 'system.dict.name' })
+          }
+          rules={[
+            {
+              required: true,
+              message:
+                intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+                intl.formatMessage({ id: 'system.dict.name' }),
+            },
+          ]}
         />
         <ProFormSelect
           name="valueType"
-          label="数据类型"
+          label={intl.formatMessage({ id: 'system.dict.value.type' })}
           options={[
             { label: 'Number', value: 1 },
             { label: 'String', value: 2 },
             { label: 'Boolean', value: 3 },
           ]}
-          rules={[{ required: true, message: '请选择数据类型' }]}
+          rules={[
+            {
+              required: true,
+              message:
+                intl.formatMessage({ id: 'common.form.placeholder.select' }) +
+                intl.formatMessage({ id: 'system.dict.value.type' }),
+            },
+          ]}
           disabled={!!dictData}
         />
-        <ProFormTextArea name="remarks" label="备注" placeholder="请输入备注" />
+        <ProFormTextArea
+          name="remarks"
+          label={intl.formatMessage({ id: 'common.field.remark' })}
+          placeholder={
+            intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+            intl.formatMessage({ id: 'common.field.remark' })
+          }
+        />
       </ProForm>
     </Modal>
   );

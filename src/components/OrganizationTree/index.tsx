@@ -18,7 +18,7 @@ const OrganizationTree: React.FC<OrganizationTreeProps> = ({
   ...restProps
 }) => {
   const [treeData, setTreeData] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [_loading, setLoading] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const [expandedKeys, setExpandedKeys] = useState<React.Key[]>([]);
 

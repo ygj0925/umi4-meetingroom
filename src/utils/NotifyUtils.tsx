@@ -1,7 +1,5 @@
-import { NotificationOutlined } from '@ant-design/icons';
 import { Modal } from 'antd';
 import { history } from 'umi';
-import { announcement } from '@/services/web/notify';
 import { login_uri, Token, User } from './Web';
 
 let logoutModal: any;
@@ -16,8 +14,6 @@ const logoutHandler = () => {
   logoutModal = undefined;
   Modal.destroyAll();
 };
-
-
 
 const Notify = {
   setCleanCache: (clean: any) => {

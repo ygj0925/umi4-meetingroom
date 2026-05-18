@@ -450,7 +450,11 @@ const IconSelect = (props: IconSelectProps) => {
         title={'选择'}
         placeholder={'选择'}
         addonAfter={
-          <Icon title={'选择'} type="setting" onClick={() => setVisible(true)} />
+          <Icon
+            title={'选择'}
+            type="setting"
+            onClick={() => setVisible(true)}
+          />
         }
         style={{ userSelect: 'none' }}
         prefix={value && value.length > 0 ? <Icon type={value} /> : ''}

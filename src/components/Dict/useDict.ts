@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useState } from 'react';
-import type { SysDictData, SysDictDataItem } from '@/services/web/system';
+import { useEffect, useState } from 'react';
+import type { SysDictData } from '@/services/web/system';
 import { dict } from '@/services/web/system';
 import { useDictContext } from './DictProvider';
 
 export function useDict(dictCode: string) {
-  const { dictMap, getDictData, loading: contextLoading } = useDictContext();
+  const { getDictData, loading: contextLoading } = useDictContext();
   const [localLoading, setLocalLoading] = useState(false);
   const [dictData, setDictData] = useState<SysDictData | undefined>(
     getDictData(dictCode),

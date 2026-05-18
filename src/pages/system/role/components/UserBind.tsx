@@ -4,8 +4,9 @@ import {
   type ProColumns,
   ProTable,
 } from '@ant-design/pro-components';
+import { useIntl } from '@umijs/max';
 import { Button, Modal, message, Popconfirm, Space } from 'antd';
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import type { SysRoleBindVo } from '@/services/web/system';
 import { role } from '@/services/web/system';
 
@@ -17,35 +18,35 @@ interface UserBindProps {
 
 const UserBind: React.FC<UserBindProps> = ({ visible, roleCode, onCancel }) => {
   const actionRef = useRef<ActionType>(null);
+  const intl = useIntl();
 
   const columns: ProColumns<SysRoleBindVo>[] = [
     {
-      title: '用户名',
+      title: intl.formatMessage({ id: 'system.user.username' }),
       dataIndex: 'username',
       ellipsis: true,
     },
     {
-      title: '昵称',
+      title: intl.formatMessage({ id: 'system.user.nickname' }),
       dataIndex: 'nickname',
       ellipsis: true,
     },
     {
-      title: '组织',
+      title: intl.formatMessage({ id: 'system.user.organization' }),
       dataIndex: 'organizationName',
       ellipsis: true,
     },
     {
-      title: '操作',
+      title: intl.formatMessage({ id: 'common.operation.confirm' }),
       valueType: 'option',
       render: (_, record) => (
         <Space>
           <Popconfirm
-            title="确认解绑"
-            description="确认解除该用户与角色的绑定？"
+            title={intl.formatMessage({ id: 'common.delete.confirm' })}
             onConfirm={() => handleUnbind(record)}
           >
             <Button type="link" danger icon={<DeleteOutlined />}>
-              解绑
+              {intl.formatMessage({ id: 'system.role.user.unbind' })}
             </Button>
           </Popconfirm>
         </Space>
@@ -56,7 +57,7 @@ const UserBind: React.FC<UserBindProps> = ({ visible, roleCode, onCancel }) => {
   const handleUnbind = async (record: SysRoleBindVo) => {
     try {
       await role.unbindUser(record.userId, roleCode);
-      message.success('解绑成功');
+      message.success(intl.formatMessage({ id: 'common.operation.success' }));
       actionRef.current?.reload();
     } catch (error) {
       console.error('Unbind failed:', error);
@@ -65,7 +66,7 @@ const UserBind: React.FC<UserBindProps> = ({ visible, roleCode, onCancel }) => {
 
   return (
     <Modal
-      title="用户绑定"
+      title={intl.formatMessage({ id: 'system.role.user.bind' })}
       open={visible}
       onCancel={onCancel}
       footer={null}

@@ -4,11 +4,12 @@ import {
   type ProColumns,
   ProTable,
 } from '@ant-design/pro-components';
+import { useIntl } from '@umijs/max';
 import { Button, Modal, message, Popconfirm, Space, Switch, Tag } from 'antd';
 import React, { useRef, useState } from 'react';
 import AccessControl from '@/components/AccessControl';
 import type { SysDictItemVo } from '@/services/web/system';
-import { dictItem, tagDefaultColorArray } from '@/services/web/system';
+import { dictItem } from '@/services/web/system';
 import DictItemForm from './DictItemForm';
 
 interface DictItemModalProps {
@@ -23,22 +24,23 @@ const DictItemModal: React.FC<DictItemModalProps> = ({
   onCancel,
 }) => {
   const actionRef = useRef<ActionType>(null);
+  const intl = useIntl();
   const [formVisible, setFormVisible] = useState(false);
   const [currentItem, setCurrentItem] = useState<SysDictItemVo | null>(null);
 
   const columns: ProColumns<SysDictItemVo>[] = [
     {
-      title: '文本值',
+      title: intl.formatMessage({ id: 'system.dict.item.name' }),
       dataIndex: 'name',
       ellipsis: true,
     },
     {
-      title: '数据值',
+      title: intl.formatMessage({ id: 'system.dict.item.value' }),
       dataIndex: 'value',
       ellipsis: true,
     },
     {
-      title: '标签颜色',
+      title: intl.formatMessage({ id: 'system.dict.item.tag.color' }),
       dataIndex: ['attributes', 'tagColor'],
       render: (_, record) => {
         const color = record.attributes?.tagColor;
@@ -46,12 +48,12 @@ const DictItemModal: React.FC<DictItemModalProps> = ({
       },
     },
     {
-      title: '排序',
+      title: intl.formatMessage({ id: 'system.dict.item.sort' }),
       dataIndex: 'sort',
       width: 80,
     },
     {
-      title: '状态',
+      title: intl.formatMessage({ id: 'system.dict.item.status' }),
       dataIndex: 'status',
       width: 100,
       render: (_, record) => (
@@ -64,12 +66,12 @@ const DictItemModal: React.FC<DictItemModalProps> = ({
       ),
     },
     {
-      title: '备注',
+      title: intl.formatMessage({ id: 'common.field.remark' }),
       dataIndex: 'remarks',
       ellipsis: true,
     },
     {
-      title: '操作',
+      title: intl.formatMessage({ id: 'common.operation.confirm' }),
       valueType: 'option',
       render: (_, record) => (
         <Space>
@@ -79,17 +81,16 @@ const DictItemModal: React.FC<DictItemModalProps> = ({
               icon={<EditOutlined />}
               onClick={() => handleEdit(record)}
             >
-              编辑
+              {intl.formatMessage({ id: 'common.operation.edit' })}
             </Button>
           </AccessControl>
           <AccessControl permission="system:dict:del">
             <Popconfirm
-              title="确认删除"
-              description="确认删除该字典项？"
+              title={intl.formatMessage({ id: 'common.delete.confirm' })}
               onConfirm={() => handleDelete(record)}
             >
               <Button type="link" danger icon={<DeleteOutlined />}>
-                删除
+                {intl.formatMessage({ id: 'common.operation.delete' })}
               </Button>
             </Popconfirm>
           </AccessControl>
@@ -111,7 +112,7 @@ const DictItemModal: React.FC<DictItemModalProps> = ({
   const handleDelete = async (record: SysDictItemVo) => {
     try {
       await dictItem.del(record);
-      message.success('删除成功');
+      message.success(intl.formatMessage({ id: 'common.delete.success' }));
       actionRef.current?.reload();
     } catch (error) {
       console.error('Delete failed:', error);
@@ -121,7 +122,7 @@ const DictItemModal: React.FC<DictItemModalProps> = ({
   const handleStatusChange = async (record: SysDictItemVo, status: number) => {
     try {
       await dictItem.updateStatus(record.id, status);
-      message.success('状态更新成功');
+      message.success(intl.formatMessage({ id: 'common.operation.success' }));
       actionRef.current?.reload();
     } catch (error) {
       console.error('Status update failed:', error);
@@ -135,7 +136,7 @@ const DictItemModal: React.FC<DictItemModalProps> = ({
 
   return (
     <Modal
-      title="字典项管理"
+      title={intl.formatMessage({ id: 'system.dict.item.title' })}
       open={visible}
       onCancel={onCancel}
       footer={null}
@@ -165,7 +166,7 @@ const DictItemModal: React.FC<DictItemModalProps> = ({
         toolBarRender={() => [
           <AccessControl key="add" permission="system:dict:add">
             <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-              新增字典项
+              {intl.formatMessage({ id: 'common.operation.add' })}
             </Button>
           </AccessControl>,
         ]}

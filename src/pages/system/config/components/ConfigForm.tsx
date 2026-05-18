@@ -3,7 +3,8 @@ import {
   ProFormText,
   ProFormTextArea,
 } from '@ant-design/pro-components';
-import { Modal } from 'antd';
+import { useIntl } from '@umijs/max';
+import { Modal, message } from 'antd';
 import React, { useEffect } from 'react';
 import type { SysConfigVo } from '@/services/web/system';
 import { config } from '@/services/web/system';
@@ -22,6 +23,7 @@ const ConfigForm: React.FC<ConfigFormProps> = ({
   onSuccess,
 }) => {
   const [form] = ProForm.useForm();
+  const intl = useIntl();
 
   useEffect(() => {
     if (visible) {
@@ -40,6 +42,7 @@ const ConfigForm: React.FC<ConfigFormProps> = ({
       } else {
         await config.create(values);
       }
+      message.success(intl.formatMessage({ id: 'common.operation.success' }));
       onSuccess();
     } catch (error) {
       console.error('Submit failed:', error);
@@ -48,7 +51,13 @@ const ConfigForm: React.FC<ConfigFormProps> = ({
 
   return (
     <Modal
-      title={configData ? '编辑配置' : '新增配置'}
+      title={
+        configData
+          ? intl.formatMessage({ id: 'common.operation.edit' }) +
+            intl.formatMessage({ id: 'system.config.title' })
+          : intl.formatMessage({ id: 'common.operation.add' }) +
+            intl.formatMessage({ id: 'system.config.title' })
+      }
       open={visible}
       onCancel={onCancel}
       footer={null}
@@ -57,25 +66,69 @@ const ConfigForm: React.FC<ConfigFormProps> = ({
       <ProForm form={form} onFinish={handleSubmit}>
         <ProFormText
           name="name"
-          label="配置名称"
-          placeholder="请输入配置名称"
-          rules={[{ required: true, message: '请输入配置名称' }]}
+          label={intl.formatMessage({ id: 'system.config.name' })}
+          placeholder={
+            intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+            intl.formatMessage({ id: 'system.config.name' })
+          }
+          rules={[
+            {
+              required: true,
+              message:
+                intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+                intl.formatMessage({ id: 'system.config.name' }),
+            },
+          ]}
         />
         <ProFormText
           name="confKey"
-          label="配置Key"
-          placeholder="请输入配置Key"
-          rules={[{ required: true, message: '请输入配置Key' }]}
+          label={intl.formatMessage({ id: 'system.config.key' })}
+          placeholder={
+            intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+            intl.formatMessage({ id: 'system.config.key' })
+          }
+          rules={[
+            {
+              required: true,
+              message:
+                intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+                intl.formatMessage({ id: 'system.config.key' }),
+            },
+          ]}
           disabled={!!configData}
         />
         <ProFormText
           name="confValue"
-          label="配置值"
-          placeholder="请输入配置值"
-          rules={[{ required: true, message: '请输入配置值' }]}
+          label={intl.formatMessage({ id: 'system.config.value' })}
+          placeholder={
+            intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+            intl.formatMessage({ id: 'system.config.value' })
+          }
+          rules={[
+            {
+              required: true,
+              message:
+                intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+                intl.formatMessage({ id: 'system.config.value' }),
+            },
+          ]}
         />
-        <ProFormText name="category" label="分类" placeholder="请输入分类" />
-        <ProFormTextArea name="remarks" label="备注" placeholder="请输入备注" />
+        <ProFormText
+          name="category"
+          label={intl.formatMessage({ id: 'system.config.category' })}
+          placeholder={
+            intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+            intl.formatMessage({ id: 'system.config.category' })
+          }
+        />
+        <ProFormTextArea
+          name="remarks"
+          label={intl.formatMessage({ id: 'common.field.remark' })}
+          placeholder={
+            intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+            intl.formatMessage({ id: 'common.field.remark' })
+          }
+        />
       </ProForm>
     </Modal>
   );

@@ -1,6 +1,6 @@
-import { Input, AutoComplete } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import { history, useAppData } from '@umijs/max';
+import { AutoComplete, Input } from 'antd';
 import { useMemo, useState } from 'react';
 
 interface MenuItem {
@@ -37,9 +37,7 @@ export default function GlobalSearch() {
     if (!value) return [];
 
     return menus
-      .filter((item) =>
-        item.name?.toLowerCase().includes(value.toLowerCase())
-      )
+      .filter((item) => item.name?.toLowerCase().includes(value.toLowerCase()))
       .map((item) => ({
         value: item.path!,
         label: item.name,
@@ -56,11 +54,7 @@ export default function GlobalSearch() {
         history.push(path);
       }}
     >
-      <Input
-        prefix={<SearchOutlined />}
-        placeholder="搜索菜单"
-        allowClear
-      />
+      <Input prefix={<SearchOutlined />} placeholder="搜索菜单" allowClear />
     </AutoComplete>
   );
 }

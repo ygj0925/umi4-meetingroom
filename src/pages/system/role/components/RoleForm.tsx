@@ -4,7 +4,8 @@ import {
   ProFormText,
   ProFormTextArea,
 } from '@ant-design/pro-components';
-import { Modal } from 'antd';
+import { useIntl } from '@umijs/max';
+import { Modal, message } from 'antd';
 import React, { useEffect } from 'react';
 import type { SysRoleVo } from '@/services/web/system';
 import { role } from '@/services/web/system';
@@ -23,6 +24,7 @@ const RoleForm: React.FC<RoleFormProps> = ({
   onSuccess,
 }) => {
   const [form] = ProForm.useForm();
+  const intl = useIntl();
 
   useEffect(() => {
     if (visible) {
@@ -41,6 +43,7 @@ const RoleForm: React.FC<RoleFormProps> = ({
       } else {
         await role.create(values);
       }
+      message.success(intl.formatMessage({ id: 'common.operation.success' }));
       onSuccess();
     } catch (error) {
       console.error('Submit failed:', error);
@@ -49,7 +52,13 @@ const RoleForm: React.FC<RoleFormProps> = ({
 
   return (
     <Modal
-      title={roleData ? '编辑角色' : '新增角色'}
+      title={
+        roleData
+          ? intl.formatMessage({ id: 'common.operation.edit' }) +
+            intl.formatMessage({ id: 'system.role.title' })
+          : intl.formatMessage({ id: 'common.operation.add' }) +
+            intl.formatMessage({ id: 'system.role.title' })
+      }
       open={visible}
       onCancel={onCancel}
       footer={null}
@@ -58,30 +67,71 @@ const RoleForm: React.FC<RoleFormProps> = ({
       <ProForm form={form} onFinish={handleSubmit} initialValues={{ type: 1 }}>
         <ProFormText
           name="name"
-          label="角色名称"
-          placeholder="请输入角色名称"
-          rules={[{ required: true, message: '请输入角色名称' }]}
+          label={intl.formatMessage({ id: 'system.role.name' })}
+          placeholder={
+            intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+            intl.formatMessage({ id: 'system.role.name' })
+          }
+          rules={[
+            {
+              required: true,
+              message:
+                intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+                intl.formatMessage({ id: 'system.role.name' }),
+            },
+          ]}
         />
         <ProFormText
           name="code"
-          label="角色标识"
-          placeholder="请输入角色标识（以 ROLE_ 开头）"
+          label={intl.formatMessage({ id: 'system.role.code' })}
+          placeholder={
+            intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+            intl.formatMessage({ id: 'system.role.code' })
+          }
           rules={[
-            { required: true, message: '请输入角色标识' },
-            { pattern: /^ROLE_/, message: '角色标识必须以 ROLE_ 开头' },
+            {
+              required: true,
+              message:
+                intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+                intl.formatMessage({ id: 'system.role.code' }),
+            },
+            {
+              pattern: /^ROLE_/,
+              message: intl.formatMessage({ id: 'system.role.code.rule' }),
+            },
           ]}
           disabled={!!roleData}
         />
         <ProFormSelect
           name="type"
-          label="角色类型"
+          label={intl.formatMessage({ id: 'system.role.type' })}
           options={[
-            { label: '系统角色', value: 1 },
-            { label: '业务角色', value: 2 },
+            {
+              label: intl.formatMessage({ id: 'system.role.type.system' }),
+              value: 1,
+            },
+            {
+              label: intl.formatMessage({ id: 'system.role.type.business' }),
+              value: 2,
+            },
           ]}
-          rules={[{ required: true, message: '请选择角色类型' }]}
+          rules={[
+            {
+              required: true,
+              message:
+                intl.formatMessage({ id: 'common.form.placeholder.select' }) +
+                intl.formatMessage({ id: 'system.role.type' }),
+            },
+          ]}
         />
-        <ProFormTextArea name="remarks" label="备注" placeholder="请输入备注" />
+        <ProFormTextArea
+          name="remarks"
+          label={intl.formatMessage({ id: 'common.field.remark' })}
+          placeholder={
+            intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+            intl.formatMessage({ id: 'common.field.remark' })
+          }
+        />
       </ProForm>
     </Modal>
   );

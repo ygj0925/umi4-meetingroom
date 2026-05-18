@@ -1,12 +1,11 @@
 import {
   ProForm,
-  ProFormDigit,
   ProFormSelect,
   ProFormText,
-  ProFormTextArea,
   ProFormTreeSelect,
 } from '@ant-design/pro-components';
-import { Modal } from 'antd';
+import { useIntl } from '@umijs/max';
+import { Modal, message } from 'antd';
 import React, { useEffect } from 'react';
 import type { SysUserVo } from '@/services/web/system';
 import { organization, role, user } from '@/services/web/system';
@@ -25,6 +24,7 @@ const UserForm: React.FC<UserFormProps> = ({
   onSuccess,
 }) => {
   const [form] = ProForm.useForm();
+  const intl = useIntl();
 
   useEffect(() => {
     if (visible) {
@@ -43,6 +43,7 @@ const UserForm: React.FC<UserFormProps> = ({
       } else {
         await user.create(values);
       }
+      message.success(intl.formatMessage({ id: 'common.operation.success' }));
       onSuccess();
     } catch (error) {
       console.error('Submit failed:', error);
@@ -68,7 +69,13 @@ const UserForm: React.FC<UserFormProps> = ({
 
   return (
     <Modal
-      title={userData ? '编辑用户' : '新增用户'}
+      title={
+        userData
+          ? intl.formatMessage({ id: 'common.operation.edit' }) +
+            intl.formatMessage({ id: 'system.user.title' })
+          : intl.formatMessage({ id: 'common.operation.add' }) +
+            intl.formatMessage({ id: 'system.user.title' })
+      }
       open={visible}
       onCancel={onCancel}
       footer={null}
@@ -82,46 +89,102 @@ const UserForm: React.FC<UserFormProps> = ({
       >
         <ProFormText
           name="username"
-          label="用户名"
-          placeholder="请输入用户名"
-          rules={[{ required: true, message: '请输入用户名' }]}
+          label={intl.formatMessage({ id: 'system.user.username' })}
+          placeholder={
+            intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+            intl.formatMessage({ id: 'system.user.username' })
+          }
+          rules={[
+            {
+              required: true,
+              message:
+                intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+                intl.formatMessage({ id: 'system.user.username' }),
+            },
+          ]}
           disabled={!!userData}
         />
         {!userData && (
           <ProFormText.Password
             name="pass"
-            label="密码"
-            placeholder="请输入密码"
+            label={intl.formatMessage({ id: 'system.user.password' })}
+            placeholder={
+              intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+              intl.formatMessage({ id: 'system.user.password' })
+            }
             rules={[
-              { required: true, message: '请输入密码' },
+              {
+                required: true,
+                message:
+                  intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+                  intl.formatMessage({ id: 'system.user.password' }),
+              },
               {
                 pattern: /^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d]{6,12}$/,
-                message: '密码必须为6-12位数字+字母组合',
+                message: intl.formatMessage({
+                  id: 'system.user.password.rule',
+                }),
               },
             ]}
           />
         )}
         <ProFormText
           name="nickname"
-          label="昵称"
-          placeholder="请输入昵称"
-          rules={[{ required: true, message: '请输入昵称' }]}
+          label={intl.formatMessage({ id: 'system.user.nickname' })}
+          placeholder={
+            intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+            intl.formatMessage({ id: 'system.user.nickname' })
+          }
+          rules={[
+            {
+              required: true,
+              message:
+                intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+                intl.formatMessage({ id: 'system.user.nickname' }),
+            },
+          ]}
         />
         <ProFormSelect
           name="gender"
-          label="性别"
+          label={intl.formatMessage({ id: 'system.user.gender' })}
           options={[
-            { label: '未知', value: 0 },
-            { label: '男', value: 1 },
-            { label: '女', value: 2 },
+            {
+              label: intl.formatMessage({ id: 'common.gender.unknown' }),
+              value: 0,
+            },
+            {
+              label: intl.formatMessage({ id: 'common.gender.male' }),
+              value: 1,
+            },
+            {
+              label: intl.formatMessage({ id: 'common.gender.female' }),
+              value: 2,
+            },
           ]}
         />
-        <ProFormText name="phoneNumber" label="电话" placeholder="请输入电话" />
-        <ProFormText name="email" label="邮箱" placeholder="请输入邮箱" />
+        <ProFormText
+          name="phoneNumber"
+          label={intl.formatMessage({ id: 'system.user.phone' })}
+          placeholder={
+            intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+            intl.formatMessage({ id: 'system.user.phone' })
+          }
+        />
+        <ProFormText
+          name="email"
+          label={intl.formatMessage({ id: 'system.user.email' })}
+          placeholder={
+            intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+            intl.formatMessage({ id: 'system.user.email' })
+          }
+        />
         <ProFormTreeSelect
           name="organizationId"
-          label="组织"
-          placeholder="请选择组织"
+          label={intl.formatMessage({ id: 'system.user.organization' })}
+          placeholder={
+            intl.formatMessage({ id: 'common.form.placeholder.select' }) +
+            intl.formatMessage({ id: 'system.user.organization' })
+          }
           request={loadOrgTree}
           fieldProps={{
             treeDefaultExpandAll: true,
@@ -129,8 +192,11 @@ const UserForm: React.FC<UserFormProps> = ({
         />
         <ProFormSelect
           name="roleCodes"
-          label="角色"
-          placeholder="请选择角色"
+          label={intl.formatMessage({ id: 'system.role.title' })}
+          placeholder={
+            intl.formatMessage({ id: 'common.form.placeholder.select' }) +
+            intl.formatMessage({ id: 'system.role.title' })
+          }
           mode="multiple"
           request={async () => {
             const data = await loadRoles();
@@ -142,10 +208,16 @@ const UserForm: React.FC<UserFormProps> = ({
         />
         <ProFormSelect
           name="status"
-          label="状态"
+          label={intl.formatMessage({ id: 'common.field.status' })}
           options={[
-            { label: '正常', value: 1 },
-            { label: '冻结', value: 0 },
+            {
+              label: intl.formatMessage({ id: 'common.status.normal' }),
+              value: 1,
+            },
+            {
+              label: intl.formatMessage({ id: 'common.status.frozen' }),
+              value: 0,
+            },
           ]}
         />
       </ProForm>

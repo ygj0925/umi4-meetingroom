@@ -7,7 +7,8 @@ import {
   ProFormTextArea,
   ProFormTreeSelect,
 } from '@ant-design/pro-components';
-import { Modal } from 'antd';
+import { useIntl } from '@umijs/max';
+import { Modal, message } from 'antd';
 import React, { useEffect, useState } from 'react';
 import type { SysMenuVo } from '@/services/web/system';
 import { menu } from '@/services/web/system';
@@ -28,6 +29,7 @@ const MenuForm: React.FC<MenuFormProps> = ({
   onSuccess,
 }) => {
   const [form] = ProForm.useForm();
+  const intl = useIntl();
   const [menuType, setMenuType] = useState<number>(0);
 
   useEffect(() => {
@@ -51,6 +53,7 @@ const MenuForm: React.FC<MenuFormProps> = ({
       } else {
         await menu.create(values);
       }
+      message.success(intl.formatMessage({ id: 'common.operation.success' }));
       onSuccess();
     } catch (error) {
       console.error('Submit failed:', error);
@@ -78,7 +81,13 @@ const MenuForm: React.FC<MenuFormProps> = ({
 
   return (
     <Modal
-      title={menuData ? '编辑菜单' : '新增菜单'}
+      title={
+        menuData
+          ? intl.formatMessage({ id: 'common.operation.edit' }) +
+            intl.formatMessage({ id: 'system.menu.title' })
+          : intl.formatMessage({ id: 'common.operation.add' }) +
+            intl.formatMessage({ id: 'system.menu.title' })
+      }
       open={visible}
       onCancel={onCancel}
       footer={null}
@@ -98,8 +107,11 @@ const MenuForm: React.FC<MenuFormProps> = ({
       >
         <ProFormTreeSelect
           name="parentId"
-          label="上级菜单"
-          placeholder="请选择上级菜单（不选则为顶级）"
+          label={intl.formatMessage({ id: 'system.menu.parent' })}
+          placeholder={
+            intl.formatMessage({ id: 'common.form.placeholder.select' }) +
+            intl.formatMessage({ id: 'system.menu.parent' })
+          }
           allowClear
           request={loadTreeData}
           fieldProps={{
@@ -108,46 +120,93 @@ const MenuForm: React.FC<MenuFormProps> = ({
         />
         <ProFormSelect
           name="type"
-          label="菜单类型"
+          label={intl.formatMessage({ id: 'system.menu.type' })}
           options={[
-            { label: '目录', value: 0 },
-            { label: '菜单', value: 1 },
-            { label: '按钮', value: 2 },
+            {
+              label: intl.formatMessage({ id: 'system.menu.type.directory' }),
+              value: 0,
+            },
+            {
+              label: intl.formatMessage({ id: 'system.menu.type.menu' }),
+              value: 1,
+            },
+            {
+              label: intl.formatMessage({ id: 'system.menu.type.button' }),
+              value: 2,
+            },
           ]}
-          rules={[{ required: true, message: '请选择菜单类型' }]}
+          rules={[
+            {
+              required: true,
+              message:
+                intl.formatMessage({ id: 'common.form.placeholder.select' }) +
+                intl.formatMessage({ id: 'system.menu.type' }),
+            },
+          ]}
           fieldProps={{ onChange: handleTypeChange }}
         />
         <ProFormText
           name="title"
-          label="菜单名称"
-          placeholder="请输入菜单名称"
-          rules={[{ required: true, message: '请输入菜单名称' }]}
+          label={intl.formatMessage({ id: 'system.menu.name' })}
+          placeholder={
+            intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+            intl.formatMessage({ id: 'system.menu.name' })
+          }
+          rules={[
+            {
+              required: true,
+              message:
+                intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+                intl.formatMessage({ id: 'system.menu.name' }),
+            },
+          ]}
         />
         <ProFormText
           name="id"
-          label="菜单ID"
+          label={intl.formatMessage({ id: 'system.menu.id' })}
           placeholder={
             menuType === 0
-              ? '目录格式: XX0000'
+              ? intl.formatMessage({ id: 'system.menu.id.directory' })
               : menuType === 1
-                ? '菜单格式: XXXX00'
-                : '按钮格式: XXXXXX'
+                ? intl.formatMessage({ id: 'system.menu.id.menu' })
+                : intl.formatMessage({ id: 'system.menu.id.button' })
           }
-          rules={[{ required: true, message: '请输入菜单ID' }]}
+          rules={[
+            {
+              required: true,
+              message:
+                intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+                intl.formatMessage({ id: 'system.menu.id' }),
+            },
+          ]}
           disabled={!!menuData}
         />
         {menuType !== 2 && (
           <>
             <ProFormText
               name="icon"
-              label="图标"
-              placeholder="请输入图标名称"
+              label={intl.formatMessage({ id: 'system.menu.icon' })}
+              placeholder={
+                intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+                intl.formatMessage({ id: 'system.menu.icon' })
+              }
             />
             <ProFormText
               name="path"
-              label="路由地址"
-              placeholder="请输入路由地址"
-              rules={[{ required: true, message: '请输入路由地址' }]}
+              label={intl.formatMessage({ id: 'system.menu.path' })}
+              placeholder={
+                intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+                intl.formatMessage({ id: 'system.menu.path' })
+              }
+              rules={[
+                {
+                  required: true,
+                  message:
+                    intl.formatMessage({
+                      id: 'common.form.placeholder.input',
+                    }) + intl.formatMessage({ id: 'system.menu.path' }),
+                },
+              ]}
             />
           </>
         )}
@@ -155,27 +214,63 @@ const MenuForm: React.FC<MenuFormProps> = ({
           <>
             <ProFormSelect
               name="targetType"
-              label="打开方式"
+              label={intl.formatMessage({ id: 'system.menu.target.type' })}
               options={[
-                { label: '组件', value: 1 },
-                { label: '内链', value: 2 },
-                { label: '外链', value: 3 },
+                {
+                  label: intl.formatMessage({
+                    id: 'system.menu.target.component',
+                  }),
+                  value: 1,
+                },
+                {
+                  label: intl.formatMessage({
+                    id: 'system.menu.target.iframe',
+                  }),
+                  value: 2,
+                },
+                {
+                  label: intl.formatMessage({ id: 'system.menu.target.link' }),
+                  value: 3,
+                },
               ]}
-              rules={[{ required: true, message: '请选择打开方式' }]}
+              rules={[
+                {
+                  required: true,
+                  message:
+                    intl.formatMessage({
+                      id: 'common.form.placeholder.select',
+                    }) + intl.formatMessage({ id: 'system.menu.target.type' }),
+                },
+              ]}
             />
             <ProFormText
               name="uri"
-              label="资源路径"
-              placeholder="组件路径或URL地址"
-              rules={[{ required: true, message: '请输入资源路径' }]}
+              label={intl.formatMessage({ id: 'system.menu.uri' })}
+              placeholder={
+                intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+                intl.formatMessage({ id: 'system.menu.uri' })
+              }
+              rules={[
+                {
+                  required: true,
+                  message:
+                    intl.formatMessage({
+                      id: 'common.form.placeholder.input',
+                    }) + intl.formatMessage({ id: 'system.menu.uri' }),
+                },
+              ]}
             />
             <ProFormSwitch
               name="keepAlive"
-              label="组件缓存"
+              label={intl.formatMessage({ id: 'system.menu.keepalive' })}
               initialValue={false}
               fieldProps={{
-                checkedChildren: '开启',
-                unCheckedChildren: '关闭',
+                checkedChildren: intl.formatMessage({
+                  id: 'common.operation.yes',
+                }),
+                unCheckedChildren: intl.formatMessage({
+                  id: 'common.operation.no',
+                }),
               }}
             />
           </>
@@ -183,28 +278,50 @@ const MenuForm: React.FC<MenuFormProps> = ({
         {menuType === 2 && (
           <ProFormText
             name="permission"
-            label="授权标识"
-            placeholder="如: system:user:add"
-            rules={[{ required: true, message: '请输入授权标识' }]}
+            label={intl.formatMessage({ id: 'system.menu.permission' })}
+            placeholder={
+              intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+              intl.formatMessage({ id: 'system.menu.permission' })
+            }
+            rules={[
+              {
+                required: true,
+                message:
+                  intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+                  intl.formatMessage({ id: 'system.menu.permission' }),
+              },
+            ]}
           />
         )}
         <ProFormSwitch
           name="hidden"
-          label="隐藏菜单"
+          label={intl.formatMessage({ id: 'system.menu.hidden' })}
           initialValue={false}
           fieldProps={{
-            checkedChildren: '是',
-            unCheckedChildren: '否',
+            checkedChildren: intl.formatMessage({ id: 'common.operation.yes' }),
+            unCheckedChildren: intl.formatMessage({
+              id: 'common.operation.no',
+            }),
           }}
         />
         <ProFormDigit
           name="sort"
-          label="排序"
-          placeholder="请输入排序"
+          label={intl.formatMessage({ id: 'common.field.sort' })}
+          placeholder={
+            intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+            intl.formatMessage({ id: 'common.field.sort' })
+          }
           min={0}
           fieldProps={{ precision: 0 }}
         />
-        <ProFormTextArea name="remarks" label="备注" placeholder="请输入备注" />
+        <ProFormTextArea
+          name="remarks"
+          label={intl.formatMessage({ id: 'common.field.remark' })}
+          placeholder={
+            intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+            intl.formatMessage({ id: 'common.field.remark' })
+          }
+        />
       </ProForm>
     </Modal>
   );

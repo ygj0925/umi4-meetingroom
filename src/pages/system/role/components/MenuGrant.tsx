@@ -1,6 +1,6 @@
+import { useIntl } from '@umijs/max';
 import { Button, Drawer, message, Space, Tree } from 'antd';
 import React, { useCallback, useEffect, useState } from 'react';
-import type { SysMenuRoleGrateVo } from '@/services/web/system';
 import { menu, role } from '@/services/web/system';
 
 interface MenuGrantProps {
@@ -14,9 +14,10 @@ const MenuGrant: React.FC<MenuGrantProps> = ({
   roleCode,
   onCancel,
 }) => {
+  const intl = useIntl();
   const [treeData, setTreeData] = useState<any[]>([]);
   const [checkedKeys, setCheckedKeys] = useState<number[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [_loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const loadMenuGrant = useCallback(async () => {
@@ -66,7 +67,7 @@ const MenuGrant: React.FC<MenuGrantProps> = ({
     setSubmitting(true);
     try {
       await role.updatePermissionIds(roleCode, checkedKeys);
-      message.success('菜单授权成功');
+      message.success(intl.formatMessage({ id: 'common.operation.success' }));
       onCancel();
     } catch (error) {
       console.error('Menu grant failed:', error);
@@ -77,15 +78,17 @@ const MenuGrant: React.FC<MenuGrantProps> = ({
 
   return (
     <Drawer
-      title="菜单授权"
+      title={intl.formatMessage({ id: 'system.role.menu.grant' })}
       open={visible}
       onClose={onCancel}
       width={400}
       extra={
         <Space>
-          <Button onClick={onCancel}>取消</Button>
+          <Button onClick={onCancel}>
+            {intl.formatMessage({ id: 'common.operation.cancel' })}
+          </Button>
           <Button type="primary" loading={submitting} onClick={handleSubmit}>
-            保存
+            {intl.formatMessage({ id: 'common.operation.save' })}
           </Button>
         </Space>
       }

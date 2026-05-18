@@ -5,7 +5,8 @@ import {
   ProFormText,
   ProFormTextArea,
 } from '@ant-design/pro-components';
-import { Modal } from 'antd';
+import { useIntl } from '@umijs/max';
+import { Modal, message } from 'antd';
 import React, { useEffect } from 'react';
 import type { SysDictItemVo } from '@/services/web/system';
 import {
@@ -31,6 +32,7 @@ const DictItemForm: React.FC<DictItemFormProps> = ({
   onSuccess,
 }) => {
   const [form] = ProForm.useForm();
+  const intl = useIntl();
 
   useEffect(() => {
     if (visible) {
@@ -72,6 +74,7 @@ const DictItemForm: React.FC<DictItemFormProps> = ({
           attributes,
         });
       }
+      message.success(intl.formatMessage({ id: 'common.operation.success' }));
       onSuccess();
     } catch (error) {
       console.error('Submit failed:', error);
@@ -80,7 +83,13 @@ const DictItemForm: React.FC<DictItemFormProps> = ({
 
   return (
     <Modal
-      title={item ? '编辑字典项' : '新增字典项'}
+      title={
+        item
+          ? intl.formatMessage({ id: 'common.operation.edit' }) +
+            intl.formatMessage({ id: 'system.dict.item' })
+          : intl.formatMessage({ id: 'common.operation.add' }) +
+            intl.formatMessage({ id: 'system.dict.item' })
+      }
       open={visible}
       onCancel={onCancel}
       footer={null}
@@ -89,26 +98,49 @@ const DictItemForm: React.FC<DictItemFormProps> = ({
       <ProForm form={form} onFinish={handleSubmit} initialValues={{ sort: 0 }}>
         <ProFormText
           name="name"
-          label="文本值"
-          placeholder="请输入文本值"
-          rules={[{ required: true, message: '请输入文本值' }]}
+          label={intl.formatMessage({ id: 'system.dict.item.name' })}
+          placeholder={
+            intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+            intl.formatMessage({ id: 'system.dict.item.name' })
+          }
+          rules={[
+            {
+              required: true,
+              message:
+                intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+                intl.formatMessage({ id: 'system.dict.item.name' }),
+            },
+          ]}
         />
         <ProFormText
           name="value"
-          label="数据值"
-          placeholder="请输入数据值"
-          rules={[{ required: true, message: '请输入数据值' }]}
+          label={intl.formatMessage({ id: 'system.dict.item.value' })}
+          placeholder={
+            intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+            intl.formatMessage({ id: 'system.dict.item.value' })
+          }
+          rules={[
+            {
+              required: true,
+              message:
+                intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+                intl.formatMessage({ id: 'system.dict.item.value' }),
+            },
+          ]}
         />
         <ProFormDigit
           name="sort"
-          label="排序"
-          placeholder="请输入排序"
+          label={intl.formatMessage({ id: 'system.dict.item.sort' })}
+          placeholder={
+            intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+            intl.formatMessage({ id: 'system.dict.item.sort' })
+          }
           min={0}
           fieldProps={{ precision: 0 }}
         />
         <ProFormSelect
           name="tagColor"
-          label="标签颜色"
+          label={intl.formatMessage({ id: 'system.dict.item.tag.color' })}
           options={tagDefaultColorArray.map((color) => ({
             label: color,
             value: color,
@@ -117,12 +149,15 @@ const DictItemForm: React.FC<DictItemFormProps> = ({
         />
         <ProFormText
           name="textColor"
-          label="文本颜色"
-          placeholder="如: #ff0000"
+          label={intl.formatMessage({ id: 'system.dict.item.text.color' })}
+          placeholder={
+            intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+            intl.formatMessage({ id: 'system.dict.item.text.color' })
+          }
         />
         <ProFormSelect
           name="badgeColor"
-          label="徽标颜色"
+          label={intl.formatMessage({ id: 'system.dict.item.badge.color' })}
           options={badgeDefaultColorArray.map((color) => ({
             label: color,
             value: color,
@@ -131,14 +166,21 @@ const DictItemForm: React.FC<DictItemFormProps> = ({
         />
         <ProFormSelect
           name="badgeStatus"
-          label="徽标状态"
+          label={intl.formatMessage({ id: 'system.dict.item.badge.status' })}
           options={badgeStatusArray.map((status) => ({
             label: status,
             value: status,
           }))}
           allowClear
         />
-        <ProFormTextArea name="remarks" label="备注" placeholder="请输入备注" />
+        <ProFormTextArea
+          name="remarks"
+          label={intl.formatMessage({ id: 'common.field.remark' })}
+          placeholder={
+            intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+            intl.formatMessage({ id: 'common.field.remark' })
+          }
+        />
       </ProForm>
     </Modal>
   );

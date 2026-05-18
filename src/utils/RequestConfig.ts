@@ -1,6 +1,6 @@
 ﻿import type { RequestConfig, RequestOptions } from '@umijs/max';
 import { message, notification } from 'antd';
-import type { AxiosError, AxiosResponse } from 'axios';
+import type { AxiosResponse } from 'axios';
 import Notify from '@/utils/NotifyUtils';
 import { isLogin, Token } from '@/utils/Web';
 
@@ -66,7 +66,7 @@ export class BizError extends Error {
 let lastErrorMsg = '';
 let lastErrorTime = 0;
 
-const showError = (msg: string) => {
+const _showError = (msg: string) => {
   const now = Date.now();
 
   if (msg === lastErrorMsg && now - lastErrorTime < 1500) {

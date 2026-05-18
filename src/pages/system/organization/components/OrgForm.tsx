@@ -5,7 +5,8 @@ import {
   ProFormTextArea,
   ProFormTreeSelect,
 } from '@ant-design/pro-components';
-import { Modal } from 'antd';
+import { useIntl } from '@umijs/max';
+import { Modal, message } from 'antd';
 import React, { useEffect } from 'react';
 import type { SysOrganizationVo } from '@/services/web/system';
 import { organization } from '@/services/web/system';
@@ -26,6 +27,7 @@ const OrgForm: React.FC<OrgFormProps> = ({
   onSuccess,
 }) => {
   const [form] = ProForm.useForm();
+  const intl = useIntl();
 
   useEffect(() => {
     if (visible) {
@@ -47,6 +49,7 @@ const OrgForm: React.FC<OrgFormProps> = ({
       } else {
         await organization.create(values);
       }
+      message.success(intl.formatMessage({ id: 'common.operation.success' }));
       onSuccess();
     } catch (error) {
       console.error('Submit failed:', error);
@@ -60,7 +63,13 @@ const OrgForm: React.FC<OrgFormProps> = ({
 
   return (
     <Modal
-      title={org ? '编辑组织' : '新增组织'}
+      title={
+        org
+          ? intl.formatMessage({ id: 'common.operation.edit' }) +
+            intl.formatMessage({ id: 'system.organization.title' })
+          : intl.formatMessage({ id: 'common.operation.add' }) +
+            intl.formatMessage({ id: 'system.organization.title' })
+      }
       open={visible}
       onCancel={onCancel}
       footer={null}
@@ -69,8 +78,11 @@ const OrgForm: React.FC<OrgFormProps> = ({
       <ProForm form={form} onFinish={handleSubmit} initialValues={{ sort: 0 }}>
         <ProFormTreeSelect
           name="parentId"
-          label="上级组织"
-          placeholder="请选择上级组织（不选则为顶级）"
+          label={intl.formatMessage({ id: 'system.organization.parent' })}
+          placeholder={
+            intl.formatMessage({ id: 'common.form.placeholder.select' }) +
+            intl.formatMessage({ id: 'system.organization.parent' })
+          }
           allowClear
           request={async () => {
             const data = await loadTreeData();
@@ -89,18 +101,38 @@ const OrgForm: React.FC<OrgFormProps> = ({
         />
         <ProFormText
           name="name"
-          label="组织名称"
-          placeholder="请输入组织名称"
-          rules={[{ required: true, message: '请输入组织名称' }]}
+          label={intl.formatMessage({ id: 'system.organization.name' })}
+          placeholder={
+            intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+            intl.formatMessage({ id: 'system.organization.name' })
+          }
+          rules={[
+            {
+              required: true,
+              message:
+                intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+                intl.formatMessage({ id: 'system.organization.name' }),
+            },
+          ]}
         />
         <ProFormDigit
           name="sort"
-          label="排序"
-          placeholder="请输入排序"
+          label={intl.formatMessage({ id: 'common.field.sort' })}
+          placeholder={
+            intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+            intl.formatMessage({ id: 'common.field.sort' })
+          }
           min={0}
           fieldProps={{ precision: 0 }}
         />
-        <ProFormTextArea name="remarks" label="备注" placeholder="请输入备注" />
+        <ProFormTextArea
+          name="remarks"
+          label={intl.formatMessage({ id: 'common.field.remark' })}
+          placeholder={
+            intl.formatMessage({ id: 'common.form.placeholder.input' }) +
+            intl.formatMessage({ id: 'common.field.remark' })
+          }
+        />
       </ProForm>
     </Modal>
   );

@@ -1,5 +1,6 @@
 import { ProForm, ProFormSelect } from '@ant-design/pro-components';
-import { Modal } from 'antd';
+import { useIntl } from '@umijs/max';
+import { Modal, message } from 'antd';
 import React, { useEffect, useState } from 'react';
 import type { SysUserVo } from '@/services/web/system';
 import { role, user } from '@/services/web/system';
@@ -18,6 +19,7 @@ const GrantModal: React.FC<GrantModalProps> = ({
   onSuccess,
 }) => {
   const [form] = ProForm.useForm();
+  const intl = useIntl();
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -49,6 +51,7 @@ const GrantModal: React.FC<GrantModalProps> = ({
         username: userData.username,
         roleCodes: values.roleCodes,
       });
+      message.success(intl.formatMessage({ id: 'common.operation.success' }));
       onSuccess();
     } catch (error) {
       console.error('Submit failed:', error);
@@ -62,7 +65,7 @@ const GrantModal: React.FC<GrantModalProps> = ({
 
   return (
     <Modal
-      title="用户授权"
+      title={intl.formatMessage({ id: 'system.user.grant' })}
       open={visible}
       onCancel={onCancel}
       footer={null}
@@ -72,8 +75,11 @@ const GrantModal: React.FC<GrantModalProps> = ({
       <ProForm form={form} onFinish={handleSubmit}>
         <ProFormSelect
           name="roleCodes"
-          label="角色"
-          placeholder="请选择角色"
+          label={intl.formatMessage({ id: 'system.role.title' })}
+          placeholder={
+            intl.formatMessage({ id: 'common.form.placeholder.select' }) +
+            intl.formatMessage({ id: 'system.role.title' })
+          }
           mode="multiple"
           request={async () => {
             const data = await loadRoles();
@@ -82,7 +88,14 @@ const GrantModal: React.FC<GrantModalProps> = ({
               value: item.value,
             }));
           }}
-          rules={[{ required: true, message: '请选择角色' }]}
+          rules={[
+            {
+              required: true,
+              message:
+                intl.formatMessage({ id: 'common.form.placeholder.select' }) +
+                intl.formatMessage({ id: 'system.role.title' }),
+            },
+          ]}
         />
       </ProForm>
     </Modal>

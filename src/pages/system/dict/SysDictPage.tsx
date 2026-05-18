@@ -5,16 +5,18 @@ import {
   type ProColumns,
   ProTable,
 } from '@ant-design/pro-components';
-import { Button, Modal, message, Popconfirm, Space, Tag } from 'antd';
+import { useIntl } from '@umijs/max';
+import { Button, message, Popconfirm, Space, Tag } from 'antd';
 import React, { useRef, useState } from 'react';
 import AccessControl from '@/components/AccessControl';
 import type { SysDictVo } from '@/services/web/system';
-import { dict, dictItem } from '@/services/web/system';
+import { dict } from '@/services/web/system';
 import DictForm from './components/DictForm';
 import DictItemModal from './components/DictItemModal';
 
 const DictPage: React.FC = () => {
   const actionRef = useRef<ActionType>(null);
+  const intl = useIntl();
   const [formVisible, setFormVisible] = useState(false);
   const [currentDict, setCurrentDict] = useState<SysDictVo | null>(null);
   const [dictItemVisible, setDictItemVisible] = useState(false);
@@ -28,44 +30,46 @@ const DictPage: React.FC = () => {
 
   const columns: ProColumns<SysDictVo>[] = [
     {
-      title: '字典标识',
+      title: intl.formatMessage({ id: 'system.dict.code' }),
       dataIndex: 'code',
       ellipsis: true,
     },
     {
-      title: '字典名称',
+      title: intl.formatMessage({ id: 'system.dict.title' }),
       dataIndex: 'title',
       ellipsis: true,
     },
     {
-      title: '数据类型',
+      title: intl.formatMessage({ id: 'system.dict.value.type' }),
       dataIndex: 'valueType',
       render: (_, record) => valueTypeMap[record.valueType] || '-',
       hideInSearch: true,
     },
     {
-      title: '备注',
+      title: intl.formatMessage({ id: 'common.field.remark' }),
       dataIndex: 'remarks',
       ellipsis: true,
       hideInSearch: true,
     },
     {
-      title: '状态',
+      title: intl.formatMessage({ id: 'common.field.status' }),
       dataIndex: 'status',
       render: (_, record) => (
         <Tag color={record.status === 1 ? 'green' : 'red'}>
-          {record.status === 1 ? '启用' : '禁用'}
+          {record.status === 1
+            ? intl.formatMessage({ id: 'common.status.enabled' })
+            : intl.formatMessage({ id: 'common.status.disabled' })}
         </Tag>
       ),
       hideInSearch: true,
     },
     {
-      title: '创建时间',
+      title: intl.formatMessage({ id: 'common.time.create' }),
       dataIndex: 'createTime',
       hideInSearch: true,
     },
     {
-      title: '操作',
+      title: intl.formatMessage({ id: 'common.operation.confirm' }),
       valueType: 'option',
       render: (_, record) => (
         <Space>
@@ -75,22 +79,24 @@ const DictPage: React.FC = () => {
               icon={<EditOutlined />}
               onClick={() => handleEdit(record)}
             >
-              编辑
+              {intl.formatMessage({ id: 'common.operation.edit' })}
             </Button>
           </AccessControl>
           <AccessControl permission="system:dict:del">
             <Popconfirm
-              title="确认删除"
-              description="删除字典将同时删除所有字典项，确认删除？"
+              title={intl.formatMessage({ id: 'common.delete.confirm' })}
+              description={intl.formatMessage({
+                id: 'system.dict.delete.items.confirm',
+              })}
               onConfirm={() => handleDelete(record)}
             >
               <Button type="link" danger icon={<DeleteOutlined />}>
-                删除
+                {intl.formatMessage({ id: 'common.operation.delete' })}
               </Button>
             </Popconfirm>
           </AccessControl>
           <Button type="link" onClick={() => handleOpenDictItem(record)}>
-            字典项
+            {intl.formatMessage({ id: 'system.dict.items' })}
           </Button>
         </Space>
       ),
@@ -110,7 +116,7 @@ const DictPage: React.FC = () => {
   const handleDelete = async (record: SysDictVo) => {
     try {
       await dict.del(record);
-      message.success('删除成功');
+      message.success(intl.formatMessage({ id: 'common.delete.success' }));
       actionRef.current?.reload();
     } catch (error) {
       console.error('Delete failed:', error);
@@ -130,7 +136,7 @@ const DictPage: React.FC = () => {
   return (
     <PageContainer>
       <ProTable<SysDictVo>
-        headerTitle="字典管理"
+        headerTitle={intl.formatMessage({ id: 'system.dict.title' })}
         actionRef={actionRef}
         rowKey="id"
         columns={columns}
@@ -150,7 +156,7 @@ const DictPage: React.FC = () => {
         toolBarRender={() => [
           <AccessControl key="add" permission="system:dict:add">
             <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-              新增字典
+              {intl.formatMessage({ id: 'common.operation.add' })}
             </Button>
           </AccessControl>,
         ]}

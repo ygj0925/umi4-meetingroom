@@ -5,6 +5,7 @@ import {
   type ProColumns,
   ProTable,
 } from '@ant-design/pro-components';
+import { useIntl } from '@umijs/max';
 import { Button, message, Popconfirm, Space } from 'antd';
 import React, { useRef, useState } from 'react';
 import AccessControl from '@/components/AccessControl';
@@ -14,44 +15,45 @@ import ConfigForm from './components/ConfigForm';
 
 const ConfigPage: React.FC = () => {
   const actionRef = useRef<ActionType>(null);
+  const intl = useIntl();
   const [formVisible, setFormVisible] = useState(false);
   const [currentConfig, setCurrentConfig] = useState<SysConfigVo | null>(null);
 
   const columns: ProColumns<SysConfigVo>[] = [
     {
-      title: '配置名称',
+      title: intl.formatMessage({ id: 'system.config.name' }),
       dataIndex: 'name',
       ellipsis: true,
     },
     {
-      title: '配置Key',
+      title: intl.formatMessage({ id: 'system.config.key' }),
       dataIndex: 'confKey',
       ellipsis: true,
     },
     {
-      title: '配置值',
+      title: intl.formatMessage({ id: 'system.config.value' }),
       dataIndex: 'confValue',
       ellipsis: true,
       hideInSearch: true,
     },
     {
-      title: '分类',
+      title: intl.formatMessage({ id: 'system.config.category' }),
       dataIndex: 'category',
       ellipsis: true,
     },
     {
-      title: '备注',
+      title: intl.formatMessage({ id: 'common.field.remark' }),
       dataIndex: 'remarks',
       ellipsis: true,
       hideInSearch: true,
     },
     {
-      title: '创建时间',
+      title: intl.formatMessage({ id: 'common.time.create' }),
       dataIndex: 'createTime',
       hideInSearch: true,
     },
     {
-      title: '操作',
+      title: intl.formatMessage({ id: 'common.operation.confirm' }),
       valueType: 'option',
       render: (_, record) => (
         <Space>
@@ -61,17 +63,16 @@ const ConfigPage: React.FC = () => {
               icon={<EditOutlined />}
               onClick={() => handleEdit(record)}
             >
-              编辑
+              {intl.formatMessage({ id: 'common.operation.edit' })}
             </Button>
           </AccessControl>
           <AccessControl permission="system:config:del">
             <Popconfirm
-              title="确认删除"
-              description="确认删除该配置？"
+              title={intl.formatMessage({ id: 'common.delete.confirm' })}
               onConfirm={() => handleDelete(record)}
             >
               <Button type="link" danger icon={<DeleteOutlined />}>
-                删除
+                {intl.formatMessage({ id: 'common.operation.delete' })}
               </Button>
             </Popconfirm>
           </AccessControl>
@@ -93,7 +94,7 @@ const ConfigPage: React.FC = () => {
   const handleDelete = async (record: SysConfigVo) => {
     try {
       await config.del(record);
-      message.success('删除成功');
+      message.success(intl.formatMessage({ id: 'common.delete.success' }));
       actionRef.current?.reload();
     } catch (error) {
       console.error('Delete failed:', error);
@@ -108,7 +109,7 @@ const ConfigPage: React.FC = () => {
   return (
     <PageContainer>
       <ProTable<SysConfigVo>
-        headerTitle="系统配置"
+        headerTitle={intl.formatMessage({ id: 'system.config.title' })}
         actionRef={actionRef}
         rowKey="id"
         columns={columns}
@@ -128,7 +129,7 @@ const ConfigPage: React.FC = () => {
         toolBarRender={() => [
           <AccessControl key="add" permission="system:config:edit">
             <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-              新增配置
+              {intl.formatMessage({ id: 'common.operation.add' })}
             </Button>
           </AccessControl>,
         ]}

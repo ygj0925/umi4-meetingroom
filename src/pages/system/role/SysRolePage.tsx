@@ -11,6 +11,7 @@ import {
   type ProColumns,
   ProTable,
 } from '@ant-design/pro-components';
+import { useIntl } from '@umijs/max';
 import { Button, message, Popconfirm, Space, Tag } from 'antd';
 import React, { useRef, useState } from 'react';
 import AccessControl from '@/components/AccessControl';
@@ -22,6 +23,7 @@ import UserBind from './components/UserBind';
 
 const RolePage: React.FC = () => {
   const actionRef = useRef<ActionType>(null);
+  const intl = useIntl();
   const [formVisible, setFormVisible] = useState(false);
   const [currentRole, setCurrentRole] = useState<SysRoleVo | null>(null);
   const [grantVisible, setGrantVisible] = useState(false);
@@ -30,23 +32,23 @@ const RolePage: React.FC = () => {
   const [userBindRoleCode, setUserBindRoleCode] = useState('');
 
   const typeMap: Record<number, string> = {
-    1: '系统角色',
-    2: '业务角色',
+    1: intl.formatMessage({ id: 'system.role.type.system' }),
+    2: intl.formatMessage({ id: 'system.role.type.business' }),
   };
 
   const columns: ProColumns<SysRoleVo>[] = [
     {
-      title: '角色名称',
+      title: intl.formatMessage({ id: 'system.role.name' }),
       dataIndex: 'name',
       ellipsis: true,
     },
     {
-      title: '角色标识',
+      title: intl.formatMessage({ id: 'system.role.code' }),
       dataIndex: 'code',
       ellipsis: true,
     },
     {
-      title: '角色类型',
+      title: intl.formatMessage({ id: 'system.role.type' }),
       dataIndex: 'type',
       render: (_, record) => (
         <Tag color={record.type === 1 ? 'blue' : 'green'}>
@@ -56,18 +58,18 @@ const RolePage: React.FC = () => {
       hideInSearch: true,
     },
     {
-      title: '备注',
+      title: intl.formatMessage({ id: 'common.field.remark' }),
       dataIndex: 'remarks',
       ellipsis: true,
       hideInSearch: true,
     },
     {
-      title: '创建时间',
+      title: intl.formatMessage({ id: 'common.time.create' }),
       dataIndex: 'createTime',
       hideInSearch: true,
     },
     {
-      title: '操作',
+      title: intl.formatMessage({ id: 'common.operation.confirm' }),
       valueType: 'option',
       render: (_, record) => (
         <Space>
@@ -77,7 +79,7 @@ const RolePage: React.FC = () => {
               icon={<EditOutlined />}
               onClick={() => handleEdit(record)}
             >
-              编辑
+              {intl.formatMessage({ id: 'common.operation.edit' })}
             </Button>
           </AccessControl>
           <AccessControl permission="system:role:grant">
@@ -86,7 +88,7 @@ const RolePage: React.FC = () => {
               icon={<SettingOutlined />}
               onClick={() => handleGrant(record)}
             >
-              菜单授权
+              {intl.formatMessage({ id: 'system.role.menu.grant' })}
             </Button>
           </AccessControl>
           <AccessControl permission="system:role:grant">
@@ -95,17 +97,16 @@ const RolePage: React.FC = () => {
               icon={<TeamOutlined />}
               onClick={() => handleUserBind(record)}
             >
-              用户绑定
+              {intl.formatMessage({ id: 'system.role.user.bind' })}
             </Button>
           </AccessControl>
           <AccessControl permission="system:role:del">
             <Popconfirm
-              title="确认删除"
-              description="确认删除该角色？"
+              title={intl.formatMessage({ id: 'common.delete.confirm' })}
               onConfirm={() => handleDelete(record)}
             >
               <Button type="link" danger icon={<DeleteOutlined />}>
-                删除
+                {intl.formatMessage({ id: 'common.operation.delete' })}
               </Button>
             </Popconfirm>
           </AccessControl>
@@ -127,7 +128,7 @@ const RolePage: React.FC = () => {
   const handleDelete = async (record: SysRoleVo) => {
     try {
       await role.del(record);
-      message.success('删除成功');
+      message.success(intl.formatMessage({ id: 'common.delete.success' }));
       actionRef.current?.reload();
     } catch (error) {
       console.error('Delete failed:', error);
@@ -152,7 +153,7 @@ const RolePage: React.FC = () => {
   return (
     <PageContainer>
       <ProTable<SysRoleVo>
-        headerTitle="角色管理"
+        headerTitle={intl.formatMessage({ id: 'system.role.title' })}
         actionRef={actionRef}
         rowKey="id"
         columns={columns}
@@ -172,7 +173,7 @@ const RolePage: React.FC = () => {
         toolBarRender={() => [
           <AccessControl key="add" permission="system:role:add">
             <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-              新增角色
+              {intl.formatMessage({ id: 'common.operation.add' })}
             </Button>
           </AccessControl>,
         ]}

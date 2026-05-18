@@ -1,7 +1,7 @@
-import IconSelect from './IconSelect';
 import Icon from './Icon';
-import SvgIcon from './SvgIcon';
+import IconSelect from './IconSelect';
 import icons from './icons';
+import SvgIcon from './SvgIcon';
 
 export { IconSelect, SvgIcon, icons };
 

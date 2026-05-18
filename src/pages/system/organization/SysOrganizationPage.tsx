@@ -10,6 +10,7 @@ import {
   type ProColumns,
   ProTable,
 } from '@ant-design/pro-components';
+import { useIntl } from '@umijs/max';
 import { Button, message, Popconfirm, Space } from 'antd';
 import React, { useRef, useState } from 'react';
 import AccessControl from '@/components/AccessControl';
@@ -19,35 +20,36 @@ import OrgForm from './components/OrgForm';
 
 const OrganizationPage: React.FC = () => {
   const actionRef = useRef<ActionType>(null);
+  const intl = useIntl();
   const [formVisible, setFormVisible] = useState(false);
   const [currentOrg, setCurrentOrg] = useState<SysOrganizationVo | null>(null);
   const [parentOrg, setParentOrg] = useState<SysOrganizationVo | null>(null);
 
   const columns: ProColumns<SysOrganizationVo>[] = [
     {
-      title: '组织名称',
+      title: intl.formatMessage({ id: 'system.organization.name' }),
       dataIndex: 'name',
       ellipsis: true,
     },
     {
-      title: '排序',
+      title: intl.formatMessage({ id: 'common.field.sort' }),
       dataIndex: 'sort',
       width: 80,
       hideInSearch: true,
     },
     {
-      title: '备注',
+      title: intl.formatMessage({ id: 'common.field.remark' }),
       dataIndex: 'remarks',
       ellipsis: true,
       hideInSearch: true,
     },
     {
-      title: '创建时间',
+      title: intl.formatMessage({ id: 'common.time.create' }),
       dataIndex: 'createTime',
       hideInSearch: true,
     },
     {
-      title: '操作',
+      title: intl.formatMessage({ id: 'common.operation.confirm' }),
       valueType: 'option',
       render: (_, record) => (
         <Space>
@@ -57,7 +59,7 @@ const OrganizationPage: React.FC = () => {
               icon={<PlusOutlined />}
               onClick={() => handleAddChild(record)}
             >
-              新增子级
+              {intl.formatMessage({ id: 'common.operation.add.child' })}
             </Button>
           </AccessControl>
           <AccessControl permission="system:organization:edit">
@@ -66,17 +68,19 @@ const OrganizationPage: React.FC = () => {
               icon={<EditOutlined />}
               onClick={() => handleEdit(record)}
             >
-              编辑
+              {intl.formatMessage({ id: 'common.operation.edit' })}
             </Button>
           </AccessControl>
           <AccessControl permission="system:organization:del">
             <Popconfirm
-              title="确认删除"
-              description="删除组织将同时删除所有子组织，确认删除？"
+              title={intl.formatMessage({ id: 'common.delete.confirm' })}
+              description={intl.formatMessage({
+                id: 'system.organization.delete.children.confirm',
+              })}
               onConfirm={() => handleDelete(record)}
             >
               <Button type="link" danger icon={<DeleteOutlined />}>
-                删除
+                {intl.formatMessage({ id: 'common.operation.delete' })}
               </Button>
             </Popconfirm>
           </AccessControl>
@@ -106,7 +110,7 @@ const OrganizationPage: React.FC = () => {
   const handleDelete = async (record: SysOrganizationVo) => {
     try {
       await organization.del(record);
-      message.success('删除成功');
+      message.success(intl.formatMessage({ id: 'common.delete.success' }));
       actionRef.current?.reload();
     } catch (error) {
       console.error('Delete failed:', error);
@@ -116,7 +120,7 @@ const OrganizationPage: React.FC = () => {
   const handleRevised = async () => {
     try {
       await organization.revised();
-      message.success('层级校正成功');
+      message.success(intl.formatMessage({ id: 'common.operation.success' }));
       actionRef.current?.reload();
     } catch (error) {
       console.error('Revised failed:', error);
@@ -131,7 +135,7 @@ const OrganizationPage: React.FC = () => {
   return (
     <PageContainer>
       <ProTable<SysOrganizationVo>
-        headerTitle="组织管理"
+        headerTitle={intl.formatMessage({ id: 'system.organization.title' })}
         actionRef={actionRef}
         rowKey="id"
         columns={columns}
@@ -146,12 +150,12 @@ const OrganizationPage: React.FC = () => {
         toolBarRender={() => [
           <AccessControl key="add" permission="system:organization:add">
             <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-              新增组织
+              {intl.formatMessage({ id: 'common.operation.add' })}
             </Button>
           </AccessControl>,
           <AccessControl key="revised" permission="system:organization:revised">
             <Button icon={<ToolOutlined />} onClick={handleRevised}>
-              校正层级
+              {intl.formatMessage({ id: 'system.organization.revised' })}
             </Button>
           </AccessControl>,
         ]}

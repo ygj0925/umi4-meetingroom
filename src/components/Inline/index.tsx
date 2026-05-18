@@ -1,5 +1,5 @@
-import { Component } from 'react';
 import type { Route } from '@ant-design/pro-layout/lib/typing';
+import { Component } from 'react';
 
 export type InlineMeta = {
   uri: string;
@@ -26,7 +26,12 @@ class Inline extends Component<InlineProps, InlineState> {
 
     return (
       <iframe
-        style={{ boxSizing: 'border-box', height: '100%', width: '100%', border: '0' }}
+        style={{
+          boxSizing: 'border-box',
+          height: '100%',
+          width: '100%',
+          border: '0',
+        }}
         src={meta?.uri || ''}
       />
     );

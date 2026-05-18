@@ -12,7 +12,8 @@ import {
   type ProColumns,
   ProTable,
 } from '@ant-design/pro-components';
-import { Avatar, Button, message, Popconfirm, Space, Switch, Tag } from 'antd';
+import { useIntl } from '@umijs/max';
+import { Avatar, Button, message, Popconfirm, Space, Switch } from 'antd';
 import React, { useCallback, useRef, useState } from 'react';
 import AccessControl from '@/components/AccessControl';
 import AvatarCropper from '@/components/AvatarCropper';
@@ -25,6 +26,7 @@ import UserForm from './components/UserForm';
 
 const UserPage: React.FC = () => {
   const actionRef = useRef<ActionType>(null);
+  const intl = useIntl();
   const [formVisible, setFormVisible] = useState(false);
   const [currentUser, setCurrentUser] = useState<SysUserVo | null>(null);
   const [grantVisible, setGrantVisible] = useState(false);
@@ -36,14 +38,14 @@ const UserPage: React.FC = () => {
   const [selectedOrgId, setSelectedOrgId] = useState<number | undefined>();
 
   const genderMap: Record<number, string> = {
-    0: '未知',
-    1: '男',
-    2: '女',
+    0: intl.formatMessage({ id: 'common.gender.unknown' }),
+    1: intl.formatMessage({ id: 'common.gender.male' }),
+    2: intl.formatMessage({ id: 'common.gender.female' }),
   };
 
   const columns: ProColumns<SysUserVo>[] = [
     {
-      title: '头像',
+      title: intl.formatMessage({ id: 'system.user.avatar' }),
       dataIndex: 'avatar',
       width: 60,
       render: (_, record) => (
@@ -57,41 +59,41 @@ const UserPage: React.FC = () => {
       hideInSearch: true,
     },
     {
-      title: '用户名',
+      title: intl.formatMessage({ id: 'system.user.username' }),
       dataIndex: 'username',
       ellipsis: true,
     },
     {
-      title: '昵称',
+      title: intl.formatMessage({ id: 'system.user.nickname' }),
       dataIndex: 'nickname',
       ellipsis: true,
     },
     {
-      title: '性别',
+      title: intl.formatMessage({ id: 'system.user.gender' }),
       dataIndex: 'gender',
       render: (_, record) => genderMap[record.gender] || '-',
       hideInSearch: true,
       width: 80,
     },
     {
-      title: '电话',
+      title: intl.formatMessage({ id: 'system.user.phone' }),
       dataIndex: 'phoneNumber',
       ellipsis: true,
     },
     {
-      title: '邮箱',
+      title: intl.formatMessage({ id: 'system.user.email' }),
       dataIndex: 'email',
       ellipsis: true,
       hideInSearch: true,
     },
     {
-      title: '组织',
+      title: intl.formatMessage({ id: 'system.user.organization' }),
       dataIndex: 'organizationName',
       ellipsis: true,
       hideInSearch: true,
     },
     {
-      title: '状态',
+      title: intl.formatMessage({ id: 'common.field.status' }),
       dataIndex: 'status',
       width: 100,
       render: (_, record) => (
@@ -105,12 +107,12 @@ const UserPage: React.FC = () => {
       hideInSearch: true,
     },
     {
-      title: '创建时间',
+      title: intl.formatMessage({ id: 'common.time.create' }),
       dataIndex: 'createTime',
       hideInSearch: true,
     },
     {
-      title: '操作',
+      title: intl.formatMessage({ id: 'common.operation.confirm' }),
       valueType: 'option',
       render: (_, record) => (
         <Space>
@@ -120,7 +122,7 @@ const UserPage: React.FC = () => {
               icon={<EditOutlined />}
               onClick={() => handleEdit(record)}
             >
-              编辑
+              {intl.formatMessage({ id: 'common.operation.edit' })}
             </Button>
           </AccessControl>
           <AccessControl permission="system:user:grant">
@@ -129,7 +131,7 @@ const UserPage: React.FC = () => {
               icon={<SafetyOutlined />}
               onClick={() => handleGrant(record)}
             >
-              授权
+              {intl.formatMessage({ id: 'common.operation.grant' })}
             </Button>
           </AccessControl>
           <AccessControl permission="system:user:pass">
@@ -138,17 +140,16 @@ const UserPage: React.FC = () => {
               icon={<KeyOutlined />}
               onClick={() => handlePass(record)}
             >
-              改密
+              {intl.formatMessage({ id: 'common.operation.change.password' })}
             </Button>
           </AccessControl>
           <AccessControl permission="system:user:del">
             <Popconfirm
-              title="确认删除"
-              description="确认删除该用户？"
+              title={intl.formatMessage({ id: 'common.delete.confirm' })}
               onConfirm={() => handleDelete(record)}
             >
               <Button type="link" danger icon={<DeleteOutlined />}>
-                删除
+                {intl.formatMessage({ id: 'common.operation.delete' })}
               </Button>
             </Popconfirm>
           </AccessControl>
@@ -170,7 +171,7 @@ const UserPage: React.FC = () => {
   const handleDelete = async (record: SysUserVo) => {
     try {
       await user.del(record);
-      message.success('删除成功');
+      message.success(intl.formatMessage({ id: 'common.delete.success' }));
       actionRef.current?.reload();
     } catch (error) {
       console.error('Delete failed:', error);
@@ -195,7 +196,7 @@ const UserPage: React.FC = () => {
   const handleStatusChange = async (record: SysUserVo, status: 0 | 1) => {
     try {
       await user.updateStatus([record.userId], status);
-      message.success('状态更新成功');
+      message.success(intl.formatMessage({ id: 'common.operation.success' }));
       actionRef.current?.reload();
     } catch (error) {
       console.error('Status update failed:', error);
@@ -205,7 +206,9 @@ const UserPage: React.FC = () => {
   const handleBatchEnable = async () => {
     const selectedRows = (actionRef.current as any)?.getSelectedRows?.() || [];
     if (selectedRows.length === 0) {
-      message.warning('请选择要启用的用户');
+      message.warning(
+        intl.formatMessage({ id: 'system.user.batch.select.warning' }),
+      );
       return;
     }
     try {
@@ -213,7 +216,7 @@ const UserPage: React.FC = () => {
         selectedRows.map((r: SysUserVo) => r.userId),
         1,
       );
-      message.success('批量启用成功');
+      message.success(intl.formatMessage({ id: 'common.operation.success' }));
       actionRef.current?.reload();
     } catch (error) {
       console.error('Batch enable failed:', error);
@@ -223,7 +226,9 @@ const UserPage: React.FC = () => {
   const handleBatchDisable = async () => {
     const selectedRows = (actionRef.current as any)?.getSelectedRows?.() || [];
     if (selectedRows.length === 0) {
-      message.warning('请选择要锁定的用户');
+      message.warning(
+        intl.formatMessage({ id: 'system.user.batch.select.warning' }),
+      );
       return;
     }
     try {
@@ -231,7 +236,7 @@ const UserPage: React.FC = () => {
         selectedRows.map((r: SysUserVo) => r.userId),
         0,
       );
-      message.success('批量锁定成功');
+      message.success(intl.formatMessage({ id: 'common.operation.success' }));
       actionRef.current?.reload();
     } catch (error) {
       console.error('Batch disable failed:', error);
@@ -245,19 +250,19 @@ const UserPage: React.FC = () => {
 
   const handleGrantSuccess = () => {
     setGrantVisible(false);
-    message.success('授权成功');
+    message.success(intl.formatMessage({ id: 'common.operation.success' }));
   };
 
   const handlePassSuccess = () => {
     setPassVisible(false);
-    message.success('密码修改成功');
+    message.success(intl.formatMessage({ id: 'common.operation.success' }));
   };
 
   const handleAvatarUploadSuccess = async (file: Blob) => {
     if (!avatarUser) return;
     try {
       await user.updateAvatar(avatarUser, file, { name: 'avatar.jpg' } as any);
-      message.success('头像上传成功');
+      message.success(intl.formatMessage({ id: 'common.operation.success' }));
       setAvatarVisible(false);
       actionRef.current?.reload();
     } catch (error) {
@@ -285,7 +290,7 @@ const UserPage: React.FC = () => {
         </div>
         <div style={{ flex: 1 }}>
           <ProTable<SysUserVo>
-            headerTitle="用户管理"
+            headerTitle={intl.formatMessage({ id: 'system.user.title' })}
             actionRef={actionRef}
             rowKey="userId"
             columns={columns}
@@ -314,14 +319,18 @@ const UserPage: React.FC = () => {
                   icon={<PlusOutlined />}
                   onClick={handleAdd}
                 >
-                  新增用户
+                  {intl.formatMessage({ id: 'common.operation.add' })}
                 </Button>
               </AccessControl>,
               <AccessControl key="batchEnable" permission="system:user:edit">
-                <Button onClick={handleBatchEnable}>批量启用</Button>
+                <Button onClick={handleBatchEnable}>
+                  {intl.formatMessage({ id: 'system.user.batch.enable' })}
+                </Button>
               </AccessControl>,
               <AccessControl key="batchDisable" permission="system:user:edit">
-                <Button onClick={handleBatchDisable}>批量锁定</Button>
+                <Button onClick={handleBatchDisable}>
+                  {intl.formatMessage({ id: 'system.user.batch.disable' })}
+                </Button>
               </AccessControl>,
             ]}
           />

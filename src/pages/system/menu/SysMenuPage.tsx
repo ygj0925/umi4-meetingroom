@@ -5,6 +5,7 @@ import {
   type ProColumns,
   ProTable,
 } from '@ant-design/pro-components';
+import { useIntl } from '@umijs/max';
 import { Button, message, Popconfirm, Space, Tag } from 'antd';
 import React, { useRef, useState } from 'react';
 import AccessControl from '@/components/AccessControl';
@@ -14,30 +15,40 @@ import MenuForm from './components/MenuForm';
 
 const MenuPage: React.FC = () => {
   const actionRef = useRef<ActionType>(null);
+  const intl = useIntl();
   const [formVisible, setFormVisible] = useState(false);
   const [currentMenu, setCurrentMenu] = useState<SysMenuVo | null>(null);
   const [parentMenu, setParentMenu] = useState<SysMenuVo | null>(null);
 
   const typeMap: Record<number, { label: string; color: string }> = {
-    0: { label: '目录', color: 'blue' },
-    1: { label: '菜单', color: 'green' },
-    2: { label: '按钮', color: 'orange' },
+    0: {
+      label: intl.formatMessage({ id: 'system.menu.type.directory' }),
+      color: 'blue',
+    },
+    1: {
+      label: intl.formatMessage({ id: 'system.menu.type.menu' }),
+      color: 'green',
+    },
+    2: {
+      label: intl.formatMessage({ id: 'system.menu.type.button' }),
+      color: 'orange',
+    },
   };
 
   const targetTypeMap: Record<number, string> = {
-    1: '组件',
-    2: '内链',
-    3: '外链',
+    1: intl.formatMessage({ id: 'system.menu.target.component' }),
+    2: intl.formatMessage({ id: 'system.menu.target.iframe' }),
+    3: intl.formatMessage({ id: 'system.menu.target.link' }),
   };
 
   const columns: ProColumns<SysMenuVo>[] = [
     {
-      title: '菜单名称',
+      title: intl.formatMessage({ id: 'system.menu.name' }),
       dataIndex: 'title',
       ellipsis: true,
     },
     {
-      title: '类型',
+      title: intl.formatMessage({ id: 'system.menu.type' }),
       dataIndex: 'type',
       width: 80,
       render: (_, record) => {
@@ -50,36 +61,36 @@ const MenuPage: React.FC = () => {
       },
     },
     {
-      title: '图标',
+      title: intl.formatMessage({ id: 'system.menu.icon' }),
       dataIndex: 'icon',
       width: 80,
       hideInSearch: true,
     },
     {
-      title: '路由地址',
+      title: intl.formatMessage({ id: 'system.menu.path' }),
       dataIndex: 'path',
       ellipsis: true,
     },
     {
-      title: '授权标识',
+      title: intl.formatMessage({ id: 'system.menu.permission' }),
       dataIndex: 'permission',
       ellipsis: true,
     },
     {
-      title: '打开方式',
+      title: intl.formatMessage({ id: 'system.menu.target.type' }),
       dataIndex: 'targetType',
       width: 100,
       render: (_, record) => targetTypeMap[record.targetType] || '-',
       hideInSearch: true,
     },
     {
-      title: '排序',
+      title: intl.formatMessage({ id: 'common.field.sort' }),
       dataIndex: 'sort',
       width: 80,
       hideInSearch: true,
     },
     {
-      title: '操作',
+      title: intl.formatMessage({ id: 'common.operation.confirm' }),
       valueType: 'option',
       render: (_, record) => (
         <Space>
@@ -90,7 +101,7 @@ const MenuPage: React.FC = () => {
                 icon={<PlusOutlined />}
                 onClick={() => handleAddChild(record)}
               >
-                新增子级
+                {intl.formatMessage({ id: 'common.operation.add.child' })}
               </Button>
             </AccessControl>
           )}
@@ -100,17 +111,19 @@ const MenuPage: React.FC = () => {
               icon={<EditOutlined />}
               onClick={() => handleEdit(record)}
             >
-              编辑
+              {intl.formatMessage({ id: 'common.operation.edit' })}
             </Button>
           </AccessControl>
           <AccessControl permission="system:menu:del">
             <Popconfirm
-              title="确认删除"
-              description="删除菜单将同时删除所有子菜单，确认删除？"
+              title={intl.formatMessage({ id: 'common.delete.confirm' })}
+              description={intl.formatMessage({
+                id: 'system.menu.delete.children.confirm',
+              })}
               onConfirm={() => handleDelete(record)}
             >
               <Button type="link" danger icon={<DeleteOutlined />}>
-                删除
+                {intl.formatMessage({ id: 'common.operation.delete' })}
               </Button>
             </Popconfirm>
           </AccessControl>
@@ -140,7 +153,7 @@ const MenuPage: React.FC = () => {
   const handleDelete = async (record: SysMenuVo) => {
     try {
       await menu.del(record);
-      message.success('删除成功');
+      message.success(intl.formatMessage({ id: 'common.delete.success' }));
       actionRef.current?.reload();
     } catch (error) {
       console.error('Delete failed:', error);
@@ -155,7 +168,7 @@ const MenuPage: React.FC = () => {
   return (
     <PageContainer>
       <ProTable<SysMenuVo>
-        headerTitle="菜单管理"
+        headerTitle={intl.formatMessage({ id: 'system.menu.title' })}
         actionRef={actionRef}
         rowKey="id"
         columns={columns}
@@ -171,7 +184,7 @@ const MenuPage: React.FC = () => {
         toolBarRender={() => [
           <AccessControl key="add" permission="system:menu:add">
             <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-              新增菜单
+              {intl.formatMessage({ id: 'common.operation.add' })}
             </Button>
           </AccessControl>,
         ]}

@@ -4,7 +4,7 @@ const icons = {
   ...antdIcons,
 };
 
-// @ts-ignore
+// @ts-expect-error
 delete icons.default;
 
 export default icons;
