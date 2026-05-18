@@ -88,7 +88,7 @@ const ActionIcons = () => {
 //   );
 // };
 const Login: React.FC = () => {
-  const { refresh, initialState, setInitialState } = useModel('@@initialState');
+  const { initialState, setInitialState } = useModel('@@initialState');
   const { styles } = useStyles();
   const { message } = App.useApp();
   const handleSubmit = async (values: API.LoginParams) => {
@@ -123,9 +123,7 @@ const Login: React.FC = () => {
             redirect: string;
           };
           message.success('登录成功');
-          history.replace(redirect || '/');
-          // 则刷新数据
-          await refresh();
+          window.location.href = redirect || '/';
         },
       );
     } catch (_error) {

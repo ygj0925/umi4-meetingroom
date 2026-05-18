@@ -1,35 +1,11 @@
-import { useModel, useRequest } from '@umijs/max';
+import { useModel } from '@umijs/max';
 import { useCallback, useEffect, useState } from 'react';
-import { router } from '@/services/web/login';
-import { serializationRemoteList } from '@/utils/RouteUtils';
+import {
+  fetchAndCacheRoutes,
+  getCachedFirstPath,
+  getCachedMenuRoutes,
+} from '@/utils/RouteUtils';
 import { isLogin } from '@/utils/Web';
-
-const getFirstUrl = (menuArray: any[]): string | undefined => {
-  for (let index = 0; index < menuArray.length; index += 1) {
-    const menu: any = menuArray[index];
-    // 菜单未隐藏
-    if (!menu?.hideInMenu) {
-      // 如果存在子级 且子级的第一个菜单存在路径
-      if (
-        menu?.children &&
-        menu?.children.length > 0 &&
-        menu?.children[0].path
-      ) {
-        const url = getFirstUrl(menu?.children);
-        // 存在首页
-        if (url) {
-          return url;
-        }
-      }
-      // 不存在, 且当前菜单是页面
-      else if (menu?.exact) {
-        return menu.path;
-      }
-    }
-  }
-
-  return undefined;
-};
 
 export default function dynamicRoute() {
   const { initialState } = useModel('@@initialState');
@@ -37,26 +13,24 @@ export default function dynamicRoute() {
   const [firstPath, setMenuFirst] = useState<string>();
   const [load, setLoad] = useState(false);
 
-  const { run } = useRequest(router, {
-    manual: true,
-    onSuccess: (res: any) => {
-      const list = res?.data ?? res ?? [];
-      const arr = Array.isArray(list) ? list : [];
-      const routerArr = serializationRemoteList(arr, 0, '');
-      setDynamicRoute(routerArr);
-      setMenuFirst(getFirstUrl(routerArr));
-    },
-  });
-
-  const getDynamicRoute = useCallback(() => {
-    run();
-  }, [run]);
+  const getDynamicRoute = useCallback(async () => {
+    await fetchAndCacheRoutes();
+    setDynamicRoute(getCachedMenuRoutes());
+    setMenuFirst(getCachedFirstPath());
+    setLoad(true);
+    window.location.reload();
+  }, []);
 
   useEffect(() => {
     if (initialState && isLogin(initialState)) {
-      getDynamicRoute();
+      const cached = getCachedMenuRoutes();
+      if (cached.length > 0) {
+        setDynamicRoute(cached);
+        setMenuFirst(getCachedFirstPath());
+        setLoad(true);
+      }
     }
-  }, [initialState, getDynamicRoute]);
+  }, [initialState]);
 
   return { dynamicRoute, firstPath, getDynamicRoute, load, setLoad };
 }

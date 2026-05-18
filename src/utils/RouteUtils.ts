@@ -1,6 +1,7 @@
-import type { GLOBAL } from '@/typings';
 import type { Route } from '@ant-design/pro-layout/lib/typing';
-import { useLocation, useNavigate } from '@umijs/max';
+import React from 'react';
+import { router } from '@/services/web/login';
+import type { GLOBAL } from '@/typings';
 
 export type ExpandRoute = {
   id?: number;
@@ -9,25 +10,39 @@ export type ExpandRoute = {
   exact?: boolean;
   children?: ExpandRoute[];
   routes?: ExpandRoute[];
+  component?: any;
 } & Route;
 
 let menuDict: Record<string, ExpandRoute> = {};
-
+let cachedMenuRoutes: ExpandRoute[] = [];
+let cachedFirstPath: string | undefined;
 
 function getRedirectPath(menu: ExpandRoute): string {
   let redirectPath = menu.path;
 
   if (menu.children && menu.children.length > 0) {
     const cm = menu.children[0];
-    // 非菜单页. 寻找下级
     if (!cm.exact) {
       return getRedirectPath(cm as ExpandRoute);
     }
-
     redirectPath = cm.path || redirectPath;
   }
 
   return redirectPath || '/';
+}
+
+function getFirstUrl(menuArray: ExpandRoute[]): string | undefined {
+  for (const menu of menuArray) {
+    if (!menu?.hideInMenu) {
+      if (menu?.children && menu.children.length > 0 && menu.children[0].path) {
+        const url = getFirstUrl(menu.children);
+        if (url) return url;
+      } else if (menu?.exact) {
+        return menu.path;
+      }
+    }
+  }
+  return undefined;
 }
 
 export function serializationRemoteList(
@@ -40,45 +55,32 @@ export function serializationRemoteList(
   list.forEach((val) => {
     if (val.parentId === pId) {
       const path = val.path.startsWith('/') ? val.path : `/${val.path}`;
-      // @ts-ignore
-      const route: BallcatMenuItem = {
+      const route: ExpandRoute = {
         id: val.id,
         hideInMenu: Boolean(val.hidden),
         icon: val.icon,
         locale: false,
         path: `${parentPath}${path}`,
         name: val.title,
-        // 只有菜单页要求全匹配
         exact: val.type === 1,
         meta: val,
       };
 
-      // 目录处理
       if (val.type === 0) {
         const childrenArray = serializationRemoteList(list, val.id, route.path);
-
         route.routes = childrenArray;
         route.children = childrenArray;
         route.meta = { ...route.meta, redirectPath: getRedirectPath(route) };
-      }
-      // 菜单处理
-      else if (val.type === 1) {
-        let component: any;
-        // 组件
+      } else if (val.type === 1) {
         if (val.targetType === 1) {
-          component = `./${val.uri}`;
-        }
-        // 内链
-        else if (val.targetType === 2) {
-         
-        }
-        // 外链
-        else {
+          route.component = val.uri;
+        } else if (val.targetType === 2) {
+          route.component = '__inline__';
+        } else {
           route.target = '_blank';
           route.path = val.uri;
         }
         menuDict[route.path] = route;
-        route.component = component;
       }
       routes.push(route);
     }
@@ -87,14 +89,67 @@ export function serializationRemoteList(
   return routes;
 }
 
-//  重定向，并且将当前的 url 保存
+export async function fetchAndCacheRoutes(): Promise<void> {
+  const res = await router();
+  const list = res?.data ?? [];
+  const arr = Array.isArray(list) ? list : [];
+  menuDict = {};
+  cachedMenuRoutes = serializationRemoteList(arr, 0, '');
+  cachedFirstPath = getFirstUrl(cachedMenuRoutes);
+}
+
+function buildClientRoute(route: ExpandRoute): any {
+  const result: any = { path: route.path, id: `dynamic-${route.id}` };
+
+  if (route.exact && route.component) {
+    let LazyComponent: React.LazyExoticComponent<any>;
+
+    if (route.component === '__inline__') {
+      LazyComponent = React.lazy(() => import('@/components/Inline'));
+    } else {
+      const uri = route.component;
+      LazyComponent = React.lazy(() =>
+        import(`@/pages/${uri}`).catch(() => import('@/pages/404')),
+      );
+    }
+
+    result.element = React.createElement(
+      React.Suspense,
+      { fallback: React.createElement('div') },
+      React.createElement(LazyComponent),
+    );
+  }
+
+  if (route.children && route.children.length > 0) {
+    result.children = route.children.map(buildClientRoute);
+    result.children.push({
+      path: '*',
+      element: React.createElement(
+        React.Suspense,
+        { fallback: React.createElement('div') },
+        React.createElement(React.lazy(() => import('@/pages/404'))),
+      ),
+    });
+  }
+
+  return result;
+}
+
+export function buildClientRoutes(menuRoutes: ExpandRoute[]): any[] {
+  return menuRoutes.map(buildClientRoute);
+}
+
+export function getCachedMenuRoutes(): ExpandRoute[] {
+  return cachedMenuRoutes;
+}
+
+export function getCachedFirstPath(): string | undefined {
+  return cachedFirstPath;
+}
+
 export function redirect(arg: string) {
   const path = arg.startsWith('/') ? arg : `/${arg}`;
-  const location = useLocation()
-  const navigate = useNavigate();
-  if (path !== location.pathname) {
-    navigate(`${path}?redirect=${location.pathname}`)
-  }
+  window.location.href = `${path}?redirect=${window.location.pathname}`;
 }
 
 const RouteUtils = {
