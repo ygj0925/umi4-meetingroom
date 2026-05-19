@@ -1,7 +1,6 @@
-import { history, useLocation } from '@umijs/max';
+import { history } from '@umijs/max';
 import { message } from 'antd';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import RouteUtils from '@/utils/RouteUtils';
+import { useCallback, useRef, useState } from 'react';
 
 export interface TabItem {
   key: string;
@@ -12,27 +11,17 @@ export interface TabItem {
 export default function useMultiTab() {
   const [tabs, setTabs] = useState<TabItem[]>([]);
   const [activeKey, setActiveKey] = useState<string>('');
-  const location = useLocation();
   const tabsRef = useRef(tabs);
   tabsRef.current = tabs;
 
-  useEffect(() => {
-    const pathname = location.pathname;
-    if (pathname.startsWith('/user/') || pathname === '/404') return;
-
-    const menuDict = RouteUtils.getMenuDict();
-    const menu = menuDict[pathname];
-    if (!menu) return;
-
-    const title = (menu.name as string) || pathname;
-
+  const addTab = useCallback((pathname: string, title: string) => {
     setTabs((prev) => {
       const exists = prev.some((t) => t.key === pathname);
       if (exists) return prev;
       return [...prev, { key: pathname, title, closable: true }];
     });
     setActiveKey(pathname);
-  }, [location.pathname]);
+  }, []);
 
   const removeTab = useCallback(
     (key: string) => {
@@ -123,6 +112,7 @@ export default function useMultiTab() {
     tabs,
     activeKey,
     setActiveKey,
+    addTab,
     removeTab,
     removeLeft,
     removeRight,

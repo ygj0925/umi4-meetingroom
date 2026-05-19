@@ -7,11 +7,12 @@ import {
   ReloadOutlined,
 } from '@ant-design/icons';
 import { RouteContext } from '@ant-design/pro-layout';
-import { history, useModel } from '@umijs/max';
+import { history, useLocation, useModel } from '@umijs/max';
 import { Dropdown, Tabs } from 'antd';
 import type { KeepAliveRef } from 'keepalive-for-react';
 import type { RefObject } from 'react';
-import React, { useCallback, useContext, useMemo } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo } from 'react';
+import RouteUtils from '@/utils/RouteUtils';
 import './index.css';
 
 interface MultiTabProps {
@@ -25,9 +26,29 @@ const MultiTab: React.FC<MultiTabProps> = ({
   style: tabStyle = 'default',
   fixed = true,
 }) => {
-  const { tabs, activeKey, removeTab, removeLeft, removeRight, removeOthers } =
-    useModel('multiTab');
+  const {
+    tabs,
+    activeKey,
+    addTab,
+    removeTab,
+    removeLeft,
+    removeRight,
+    removeOthers,
+  } = useModel('multiTab');
   const { siderWidth } = useContext(RouteContext);
+  const location = useLocation();
+
+  useEffect(() => {
+    const pathname = location.pathname;
+    if (pathname.startsWith('/user/') || pathname === '/404') return;
+
+    const menuDict = RouteUtils.getMenuDict();
+    const menu = menuDict[pathname];
+    if (!menu) return;
+
+    const title = (menu.name as string) || pathname;
+    addTab(pathname, title);
+  }, [location.pathname, addTab]);
 
   const destroyKeys = useCallback(
     async (keys: string[]) => {
