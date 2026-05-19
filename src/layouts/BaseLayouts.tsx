@@ -23,10 +23,15 @@ import {
 } from '@ant-design/pro-components';
 import { history, Link, Outlet, useLocation, useModel } from '@umijs/max';
 import { Input, theme } from 'antd';
+import { useKeepAliveRef } from 'keepalive-for-react';
 import React, { type FC, useEffect, useMemo } from 'react';
 import defaultSettings from '@/../config/defaultSettings';
 import routesConfig from '@/../config/routes';
+import ChatFloat from '@/components/ChatFloat';
 import Footer from '@/components/Footer';
+import KeepAliveOutlet from '@/components/KeepAliveOutlet';
+import MultiTab from '@/components/MultiTab';
+import Notify from '@/utils/NotifyUtils';
 import { isLogin, LayoutSetting } from '@/utils/Web';
 
 /**
@@ -137,6 +142,21 @@ const BaseLayout: FC<BaseLayoutProps> = () => {
   const location = useLocation();
 
   const { initialState, setInitialState } = useModel('@@initialState');
+
+  const aliveRef = useKeepAliveRef();
+
+  const multiTab =
+    (initialState?.settings as any)?.multiTab ?? defaultSettings.multiTab;
+  const multiTabStyle =
+    (initialState?.settings as any)?.multiTabStyle ?? 'default';
+
+  useEffect(() => {
+    if (multiTab) {
+      Notify.setCleanCache(() => {
+        aliveRef.current?.destroyAll();
+      });
+    }
+  }, [multiTab, aliveRef]);
 
   /**
    * 动态菜单 model
@@ -329,12 +349,22 @@ const BaseLayout: FC<BaseLayoutProps> = () => {
         }))
       }
       {...initialState?.settings}
+      contentStyle={{
+        marginTop: multiTab ? 40 : undefined,
+      }}
     >
+      {multiTab && (
+        <MultiTab
+          aliveRef={aliveRef}
+          style={multiTabStyle}
+          fixed={defaultSettings.fixedHeader}
+        />
+      )}
       <WaterMark
         content={initialState?.user?.info?.username}
         style={{ height: '100%' }}
       >
-        <Outlet />
+        {multiTab ? <KeepAliveOutlet aliveRef={aliveRef} /> : <Outlet />}
       </WaterMark>
 
       <SettingDrawer
@@ -350,6 +380,8 @@ const BaseLayout: FC<BaseLayoutProps> = () => {
           LayoutSetting.set(nextSettings);
         }}
       />
+
+      {isLogin(initialState) && <ChatFloat />}
     </ProLayout>
   );
 };
