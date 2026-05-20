@@ -6,9 +6,7 @@ import defaultSettings from './defaultSettings';
 import proxy from './proxy';
 import routes from './routes';
 
-const { REACT_APP_ENV = 'dev' } = process.env;
-
-console.log(proxy[REACT_APP_ENV as keyof typeof proxy], 'process.env');
+const { REACT_APP_ENV = 'dev', NODE_ENV = 'development' } = process.env;
 
 /**
  * @name 使用公共路径
@@ -16,6 +14,8 @@ console.log(proxy[REACT_APP_ENV as keyof typeof proxy], 'process.env');
  * @doc https://umijs.org/docs/api/config#publicpath
  */
 const PUBLIC_PATH: string = '/';
+
+const isProd = NODE_ENV === 'production';
 export default defineConfig({
   /**
    * @name 开启 hash 模式
@@ -49,6 +49,8 @@ export default defineConfig({
    */
   // umi routes: https://umijs.org/docs/routing
   routes,
+  // 启用约定式布局，使 src/layouts/index.tsx 生效
+  conventionLayout: true,
   /**
    * @name 主题的配置
    * @description 虽然叫主题，但是其实只是 less 的变量设置
@@ -89,13 +91,12 @@ export default defineConfig({
   initialState: {},
   /**
    * @name layout 插件
+   * @description 设为 false 禁用 Umi 自带的 Pro Layout，改用 layouts 中的自定义 ProLayout
    * @doc https://umijs.org/docs/max/layout-menu
    */
   title: 'Ant Design Pro',
-  layout: {
-    locale: true,
-    ...defaultSettings,
-  },
+
+  layout: false,
   /**
    * @name moment2dayjs 插件
    * @description 将项目中的 moment 替换为 dayjs
@@ -108,7 +109,15 @@ export default defineConfig({
   /**
    * @name 国际化插件
    * @doc https://umijs.org/docs/max/i18n
-   */ /**
+   */
+  locale: {
+    default: 'zh-CN',
+    antd: true,
+    title: true,
+    baseNavigator: true,
+    baseSeparator: '-',
+  },
+  /**
    * @name antd 插件
    * @description 内置了 babel import 插件
    * @doc https://umijs.org/docs/max/antd#antd
@@ -165,10 +174,29 @@ export default defineConfig({
    * @description 使用 mako 极速研发
    * @doc https://umijs.org/docs/api/config#mako
    */
-  mako: {},
-  esbuildMinifyIIFE: true,
-  requestRecord: {},
-  exportStatic: {},
+  mako: isProd
+    ? ({
+        codeSplitting: {
+          strategy: 'granular',
+          options: {
+            frameworkPackages: [
+              'react',
+              'react-dom',
+              'antd',
+              '@ant-design/icons',
+              '@ant-design/pro-components',
+              '@ant-design/pro-layout',
+              '@ant-design/x',
+            ],
+            libMinSize: 160000,
+          },
+        },
+        optimization: {
+          skipModules: true,
+          concatenateModules: true,
+        },
+      } as any)
+    : {},
   define: {
     'process.env.CI': process.env.CI,
   },

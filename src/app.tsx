@@ -1,107 +1,63 @@
 import type { Settings as LayoutSettings } from '@ant-design/pro-components';
-import { SettingDrawer } from '@ant-design/pro-components';
-import { AvatarDropdown, AvatarName, Footer } from '@/components';
-import { currentUser as queryCurrentUser } from '@/services/ant-design-pro/api';
 import '@ant-design/v5-patch-for-react-19';
-import type { RequestConfig, RunTimeLayoutConfig } from '@umijs/max';
-import { history } from '@umijs/max';
+import type { RequestConfig } from '@umijs/max';
+import type { GLOBAL } from '@/typings';
 import { requestConfig } from '@/utils/RequestConfig';
-import defaultSettings from '../config/defaultSettings';
-
-const isDev = process.env.NODE_ENV === 'development' || process.env.CI;
-const loginPath = '/user/login';
+import {
+  buildClientRoutes,
+  fetchAndCacheRoutes,
+  getCachedMenuRoutes,
+} from '@/utils/RouteUtils';
+import { LayoutSetting, Token, User } from '@/utils/Web';
+import settings from '../config/defaultSettings';
 
 /**
  * @see https://umijs.org/docs/api/runtime-config#getinitialstate
  * */
 export async function getInitialState(): Promise<{
   settings?: Partial<LayoutSettings>;
-  currentUser?: API.CurrentUser;
+  user?: GLOBAL.UserInfo;
   loading?: boolean;
-  fetchUserInfo?: () => Promise<API.CurrentUser | undefined>;
 }> {
-  const fetchUserInfo = async () => {
-    try {
-      const msg = await queryCurrentUser({
-        skipErrorHandler: true,
-      });
-      return msg.data;
-    } catch (_error) {
-      history.push(loginPath);
-    }
-    return undefined;
+  const is: GLOBAL.Is = {
+    settings: { ...settings, ...LayoutSetting.get() },
   };
-  // 如果不是登录页面，执行
-  const { location } = history;
-  if (
-    ![loginPath, '/user/register', '/user/register-result'].includes(
-      location.pathname,
-    )
-  ) {
-    const currentUser = await fetchUserInfo();
-    return {
-      fetchUserInfo,
-      currentUser,
-      settings: defaultSettings as Partial<LayoutSettings>,
-    };
+  const cache = User.get();
+
+  if (cache) {
+    is.user = cache ? JSON.parse(cache) : {};
   }
-  return {
-    fetchUserInfo,
-    settings: defaultSettings as Partial<LayoutSettings>,
-  };
+
+  return { ...is };
 }
 
-export const layout: RunTimeLayoutConfig = ({
-  initialState,
-  setInitialState,
-}) => {
-  return {
-    avatarProps: {
-      src: initialState?.currentUser?.avatar,
-      title: <AvatarName />,
-      render: (_, avatarChildren) => {
-        return <AvatarDropdown>{avatarChildren}</AvatarDropdown>;
-      },
-    },
-    waterMarkProps: {
-      content: initialState?.currentUser?.name,
-    },
-    footerRender: () => <Footer />,
-    onPageChange: () => {
-      const { location } = history;
-      // 如果没有登录，重定向到 login
-      if (!initialState?.currentUser && location.pathname !== loginPath) {
-        history.push(loginPath);
-      }
-    },
-    menuHeaderRender: undefined,
-    // 自定义 403 页面
-    // unAccessible: <div>unAccessible</div>,
-    // 增加一个 loading 的状态
-    childrenRender: (children) => {
-      // if (initialState?.loading) return <PageLoading />;
-      return (
-        <>
-          {children}
-          {isDev && (
-            <SettingDrawer
-              disableUrlParams
-              enableDarkTheme
-              settings={initialState?.settings}
-              onSettingChange={(settings) => {
-                setInitialState((preInitialState) => ({
-                  ...preInitialState,
-                  settings,
-                }));
-              }}
-            />
-          )}
-        </>
-      );
-    },
-    ...initialState?.settings,
-  };
-};
+export function render(oldRender: () => void) {
+  if (Token.get()) {
+    fetchAndCacheRoutes()
+      .then(() => oldRender())
+      .catch(() => oldRender());
+  } else {
+    oldRender();
+  }
+}
+
+export function patchClientRoutes({ routes }: { routes: any[] }) {
+  const dynamicClientRoutes = buildClientRoutes(getCachedMenuRoutes());
+  if (dynamicClientRoutes.length === 0) return;
+
+  const layoutRoute = routes.find((r: any) => r.path === '/');
+  if (layoutRoute) {
+    if (!layoutRoute.children) layoutRoute.children = [];
+    const catchAllIndex = layoutRoute.children.findIndex(
+      (r: any) => r.path === '/*',
+    );
+    if (catchAllIndex >= 0) {
+      layoutRoute.children.splice(catchAllIndex, 0, ...dynamicClientRoutes);
+    } else {
+      layoutRoute.children.push(...dynamicClientRoutes);
+    }
+  }
+}
 
 /**
  * @name request 配置，可以配置错误处理

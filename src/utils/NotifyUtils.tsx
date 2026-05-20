@@ -1,10 +1,7 @@
-import { NotificationOutlined } from '@ant-design/icons';
 import { Modal } from 'antd';
 import { history } from 'umi';
-import { announcement } from '@/services/web/notify';
 import { login_uri, Token, User } from './Web';
 
-export type NotifyProps = { id: string; content: string; title: string };
 let logoutModal: any;
 let cleanCache: any = () => {};
 
@@ -18,40 +15,9 @@ const logoutHandler = () => {
   Modal.destroyAll();
 };
 
-const readNotice = (id: string) => {
-  if (id && id.length > 0) {
-    // 非预览. 发已读请求
-    announcement.readAnnouncement(id);
-  }
-};
-
 const Notify = {
   setCleanCache: (clean: any) => {
     cleanCache = clean;
-  },
-  preview: (props: NotifyProps) => {
-    Notify.notice({ ...props, id: '' });
-  },
-  notice: ({ id, content, title }: NotifyProps) => {
-    Modal.info({
-      title,
-      content: <div dangerouslySetInnerHTML={{ __html: content }} />,
-      width: 800,
-      icon: (
-        <NotificationOutlined
-          style={{
-            color: '#1890ff',
-            fontSize: '22px',
-            marginRight: '16px',
-            float: 'left',
-          }}
-        />
-      ),
-      keyboard: false,
-      closable: false,
-      onOk: () => readNotice(id),
-      onCancel: () => readNotice(id),
-    });
   },
   logout: () => {
     // 未登录页不提示

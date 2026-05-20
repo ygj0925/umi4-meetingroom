@@ -36,7 +36,7 @@ export type R<T> = {
 export type QueryParam<T> = {
   page: number;
   size: number;
-  sort: string[];
+  sort?: string[];
 } & Partial<T>;
 
 export type PageResult<T> = {

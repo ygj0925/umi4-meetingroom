@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"D:\\\\project\\\\umi4-meetingroom\" -Depth 0)",
+      "Bash(Select-Object Name, Mode)",
+      "PowerShell(git add *)",
+      "Bash(npx openspec *)",
+      "Bash(npm run *)",
+      "Bash(git add *)",
+      "Bash(git commit -m 'feat: 实现系统管理模块 *)",
+      "Bash(git push *)",
+      "Bash(npx @biomejs/biome check --write --unsafe)"
+    ]
+  }
+}

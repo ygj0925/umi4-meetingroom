@@ -1,26 +1,21 @@
 import {
   AlipayCircleOutlined,
   LockOutlined,
-  MobileOutlined,
   TaobaoCircleOutlined,
   UserOutlined,
   WeiboCircleOutlined,
 } from '@ant-design/icons';
-import {
-  LoginForm,
-  ProFormCaptcha,
-  ProFormCheckbox,
-  ProFormText,
-} from '@ant-design/pro-components';
-import { Helmet, useModel } from '@umijs/max';
-import { Alert, App, Tabs } from 'antd';
+import { LoginForm, ProFormText } from '@ant-design/pro-components';
+import { Helmet, history, useModel } from '@umijs/max';
+import { App } from 'antd';
 import { createStyles } from 'antd-style';
-import React, { useState } from 'react';
+import { parse } from 'query-string';
+import React from 'react';
 import { flushSync } from 'react-dom';
-import { Footer } from '@/components';
-import { getFakeCaptcha } from '@/services/ant-design-pro/login';
+import Footer from '@/components/Footer';
 import { login } from '@/services/web/login';
 import { pwd } from '@/utils/Encrypt';
+import { Token, User } from '@/utils/Web';
 import Settings from '../../../../config/defaultSettings';
 
 const useStyles = createStyles(({ token }) => {
@@ -78,54 +73,65 @@ const ActionIcons = () => {
   );
 };
 
-const LoginMessage: React.FC<{
-  content: string;
-}> = ({ content }) => {
-  return (
-    <Alert
-      style={{
-        marginBottom: 24,
-      }}
-      message={content}
-      type="error"
-      showIcon
-    />
-  );
-};
+// const LoginMessage: React.FC<{
+//   content: string;
+// }> = ({ content }) => {
+//   return (
+//     <Alert
+//       style={{
+//         marginBottom: 24,
+//       }}
+//       message={content}
+//       type="error"
+//       showIcon
+//     />
+//   );
+// };
 const Login: React.FC = () => {
-  const [userLoginState, setUserLoginState] = useState<API.LoginResult>({});
   const { initialState, setInitialState } = useModel('@@initialState');
   const { styles } = useStyles();
   const { message } = App.useApp();
-  const fetchUserInfo = async () => {
-    const userInfo = await initialState?.fetchUserInfo?.();
-    if (userInfo) {
-      flushSync(() => {
-        setInitialState((s) => ({
-          ...s,
-          currentUser: userInfo,
-        }));
-      });
-    }
-  };
   const handleSubmit = async (values: API.LoginParams) => {
-    console.log(values, 'values');
     try {
       // 登录
       login({ ...values, password: pwd.encrypt(`${values.password}`) }).then(
         async (res) => {
           // 解析远程数据
-          console.log(res);
+          const remoteUser = {
+            ...res,
+            roles: res.attributes.roleCodes,
+            permissions: res.attributes.permissions,
+          };
+
+          console.log(initialState, 'initialState');
+          console.log(res.info, 'res.info');
+          if (res.info) {
+            flushSync(() => {
+              setInitialState((s) => ({
+                ...s,
+                currentUser: res.info,
+              }));
+            });
+          }
+          console.log(initialState, 'initialState2');
+
+          // 缓存用户信息
+          User.set(JSON.stringify(remoteUser));
+          // 缓存token
+          Token.set(remoteUser.access_token);
+          const { redirect } = parse(history.location.search) as {
+            redirect: string;
+          };
+          message.success('登录成功');
+          window.location.href = redirect || '/';
         },
       );
-    } catch (error) {
+    } catch (_error) {
       const defaultLoginFailureMessage = '登录失败，请重试！';
-      console.log(error);
       message.error(defaultLoginFailureMessage);
     }
   };
 
-  const { status } = userLoginState;
   return (
     <div className={styles.container}>
       <Helmet>
@@ -153,36 +159,34 @@ const Login: React.FC = () => {
             await handleSubmit(values as API.LoginParams);
           }}
         >
-          <>
-            <ProFormText
-              name="username"
-              fieldProps={{
-                size: 'large',
-                prefix: <UserOutlined />,
-              }}
-              placeholder={'用户名: admin or user'}
-              rules={[
-                {
-                  required: true,
-                  message: '用户名是必填项！',
-                },
-              ]}
-            />
-            <ProFormText.Password
-              name="password"
-              fieldProps={{
-                size: 'large',
-                prefix: <LockOutlined />,
-              }}
-              placeholder={'密码: ant.design'}
-              rules={[
-                {
-                  required: true,
-                  message: '密码是必填项！',
-                },
-              ]}
-            />
-          </>
+          <ProFormText
+            name="username"
+            fieldProps={{
+              size: 'large',
+              prefix: <UserOutlined />,
+            }}
+            placeholder={'用户名: admin or user'}
+            rules={[
+              {
+                required: true,
+                message: '用户名是必填项！',
+              },
+            ]}
+          />
+          <ProFormText.Password
+            name="password"
+            fieldProps={{
+              size: 'large',
+              prefix: <LockOutlined />,
+            }}
+            placeholder={'密码: ant.design'}
+            rules={[
+              {
+                required: true,
+                message: '密码是必填项！',
+              },
+            ]}
+          />
           <div
             style={{
               marginBottom: 24,

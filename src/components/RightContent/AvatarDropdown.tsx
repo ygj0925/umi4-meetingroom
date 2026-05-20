@@ -19,8 +19,8 @@ export type GlobalHeaderRightProps = {
 
 export const AvatarName = () => {
   const { initialState } = useModel('@@initialState');
-  const { currentUser } = initialState || {};
-  return <span className="anticon">{currentUser?.name}</span>;
+  const { user } = initialState || {};
+  return <span className="anticon">{user?.info.username}</span>;
 };
 
 const useStyles = createStyles(({ token }) => {
@@ -73,7 +73,7 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({
     const { key } = event;
     if (key === 'logout') {
       flushSync(() => {
-        setInitialState((s) => ({ ...s, currentUser: undefined }));
+        setInitialState((s) => ({ ...s, user: undefined }));
       });
       loginOut();
       return;
@@ -97,9 +97,9 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({
     return loading;
   }
 
-  const { currentUser } = initialState;
+  const { user } = initialState;
 
-  if (!currentUser || !currentUser.name) {
+  if (!user || !user.info.username) {
     return loading;
   }
 
