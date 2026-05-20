@@ -2,6 +2,7 @@ import type { Route } from '@ant-design/pro-layout/lib/typing';
 import React from 'react';
 import { router } from '@/services/web/login';
 import type { GLOBAL } from '@/typings';
+import pageMap from '@/utils/pageImports';
 
 export type ExpandRoute = {
   id?: number;
@@ -108,9 +109,8 @@ function buildClientRoute(route: ExpandRoute): any {
       LazyComponent = React.lazy(() => import('@/components/Inline'));
     } else {
       const uri = route.component;
-      LazyComponent = React.lazy(() =>
-        import(`@/pages/${uri}`).catch(() => import('@/pages/404')),
-      );
+      const loader = pageMap[uri];
+      LazyComponent = React.lazy(loader ?? (() => import('@/pages/404')));
     }
 
     result.element = React.createElement(

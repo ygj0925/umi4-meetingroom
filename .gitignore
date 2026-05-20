@@ -33,6 +33,9 @@ functions/*
 .umi-production
 .umi-test
 
+# auto-generated page import map
+src/utils/pageImports.ts
+
 # screenshot
 screenshot
 .firebase

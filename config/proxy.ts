@@ -17,9 +17,10 @@ export default {
    */
   dev: {
     '/api/': {
-      target: 'https://gptdev.3sbio.com',
+      // target: 'https://gptdev.3sbio.com',
+      target: 'http://localhost:8080',
       changeOrigin: true,
-      // pathRewrite: { '^/api': '' },
+      pathRewrite: { '^/api': '' },
     },
   },
 };
