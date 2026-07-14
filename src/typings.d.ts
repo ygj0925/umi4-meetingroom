@@ -78,9 +78,9 @@ declare namespace GLOBAL {
   type Router = {
     hidden: boolean;
     icon: string;
-    id: number;
+    id: number | string;
     keepAlive: boolean;
-    parentId: number;
+    parentId: number | string;
     path: string;
     remarks: string;
     /**
@@ -91,28 +91,40 @@ declare namespace GLOBAL {
     /**
      * 0: 目录 1: 菜单 2: 按钮
      */
-    type: 0 | 1 | 2;
+    type: 0 | 1 | 2 | 3;
     uri: string;
+    name?: string;
+    component?: string;
+    redirect?: string;
+    isExternal?: boolean;
+    isHidden?: boolean;
+    isCache?: boolean;
+    permission?: string;
+    roles?: string[];
+    sort?: number;
+    status?: 0 | 1;
+    activeMenu?: string;
+    alwaysShow?: boolean;
+    breadcrumb?: boolean;
+    showInTabs?: boolean;
+    affix?: boolean;
     children?: Router[];
   };
 
   type UserInfo = {
-    info: {
-      avatar?: string;
-      nickname?: string;
-      type: number;
-      userId: number;
-      username: string;
-    };
-    permissions: string[];
-    access_token: string;
-    refresh_token: string;
+    id: string;
+    username: string;
+    nickname: string;
+    gender: 0 | 1 | 2;
+    email: string;
+    phone: string;
+    avatar: string;
+    pwdResetTime: string;
+    pwdExpired: boolean;
+    registrationDate: string;
+    deptName: string;
     roles: string[];
-    scope: 'server';
-    token_type: 'bearer';
-    attributes: {
-      permissions: string[];
-      roleCodes: string[];
-    };
+    roleNames: string[];
+    permissions: string[];
   };
 }

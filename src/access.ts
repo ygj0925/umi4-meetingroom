@@ -1,15 +1,17 @@
 /**
  * @see https://umijs.org/docs/max/access#access
  * */
+import type { GLOBAL } from '@/typings';
+
 export default function access(
-  initialState: { currentUser?: API.CurrentUser } | undefined,
+  initialState: { user?: GLOBAL.UserInfo } | undefined,
 ) {
-  const { currentUser } = initialState ?? {};
-  const permissions: string[] = (currentUser as any)?.permissions || [];
-  const roles: string[] = (currentUser as any)?.roles || [];
+  const currentUser = initialState?.user;
+  const permissions = currentUser?.permissions || [];
+  const roles = currentUser?.roles || [];
 
   return {
-    canAdmin: currentUser && currentUser.access === 'admin',
+    canAdmin: roles.includes('admin') || roles.includes('super_admin'),
     permissions,
     roles,
     hasPermission: (permission: string) => permissions.includes(permission),

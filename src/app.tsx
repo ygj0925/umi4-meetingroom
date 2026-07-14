@@ -1,6 +1,7 @@
 import type { Settings as LayoutSettings } from '@ant-design/pro-components';
 import '@ant-design/v5-patch-for-react-19';
 import type { RequestConfig } from '@umijs/max';
+import { getUserInfo } from '@/services/web/login';
 import type { GLOBAL } from '@/typings';
 import { requestConfig } from '@/utils/RequestConfig';
 import {
@@ -25,7 +26,23 @@ export async function getInitialState(): Promise<{
   const cache = User.get();
 
   if (cache) {
-    is.user = cache ? JSON.parse(cache) : {};
+    try {
+      is.user = JSON.parse(cache);
+    } catch {
+      User.clean();
+    }
+  }
+
+  if (Token.get()) {
+    try {
+      const response = await getUserInfo();
+      is.user = response.data;
+      User.set(JSON.stringify(response.data));
+    } catch {
+      Token.clean();
+      User.clean();
+      is.user = undefined;
+    }
   }
 
   return { ...is };

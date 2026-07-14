@@ -1,5 +1,6 @@
 // eslint-disable-next-line max-classes-per-file
 import CryptoJS from 'crypto-js';
+import { JSEncrypt } from 'jsencrypt';
 
 class Aes {
   /**
@@ -39,3 +40,13 @@ class Pwd {
 
 export const aes = new Aes();
 export const pwd = new Pwd();
+
+const rsaPublicKey =
+  'MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAM51dgYtMyF+tTQt80sfFOpSV27a7t9u' +
+  'aUVeFrdGiVxscuizE7H8SMntYqfn9lp8a5GH5P1/GGehVjUD2gF/4kcCAwEAAQ==';
+
+export function encryptByRsa(value: string) {
+  const encryptor = new JSEncrypt();
+  encryptor.setPublicKey(rsaPublicKey);
+  return encryptor.encrypt(value) || '';
+}

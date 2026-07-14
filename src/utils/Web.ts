@@ -8,8 +8,11 @@ import type { GLOBAL } from '@/typings';
 import type { ProjectSetting } from '../../config/defaultSettings';
 import settings from '../../config/defaultSettings';
 
-export const token_key = 'access-token';
+export const token_key = 'token';
 export const user_key = 'user';
+export const tenant_id_key = 'tenant_id';
+export const login_corp_key = 'login_corp';
+export const login_redirect_key = 'login_redirect';
 export const dict_data_key = 'dict_data';
 export const dict_hash_key = 'dict_hash';
 export const layout_setting_key = 'layout_setting';
@@ -54,6 +57,30 @@ export const User = {
     remove(user_key);
   },
 };
+
+export const Tenant = {
+  get: () => get(tenant_id_key),
+  set: (val: string) => set(tenant_id_key, val),
+  clean: () => remove(tenant_id_key),
+};
+
+export const LoginCorp = {
+  get: () => get(login_corp_key),
+  set: (val: string) => set(login_corp_key, val),
+  clean: () => remove(login_corp_key),
+};
+
+export const LoginRedirect = {
+  get: () => get(login_redirect_key),
+  set: (val: string) => set(login_redirect_key, val),
+  clean: () => remove(login_redirect_key),
+};
+
+export function clearAuthStorage() {
+  Token.clean();
+  User.clean();
+  Tenant.clean();
+}
 
 export const Dict = {
   getHashs: (): SysDictDataHash => {
@@ -152,5 +179,5 @@ export function isLogin(initialState?: GLOBAL.Is) {
   }
 
   // 存在token 已登录
-  return !!initialState?.user?.access_token && !!Token.get();
+  return !!initialState?.user && !!Token.get();
 }

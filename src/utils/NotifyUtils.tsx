@@ -1,6 +1,6 @@
 import { Modal } from 'antd';
 import { history } from 'umi';
-import { login_uri, Token, User } from './Web';
+import { clearAuthStorage, login_uri, Token } from './Web';
 
 let logoutModal: any;
 let cleanCache: any = () => {};
@@ -8,9 +8,10 @@ let cleanCache: any = () => {};
 const logoutHandler = () => {
   cleanCache();
   const { pathname } = history.location;
-  history.replace(`${login_uri}?redirect=${pathname}`);
-  Token.clean();
-  User.clean();
+  clearAuthStorage();
+  import('./LoginRedirect').then(({ redirectToLogin }) =>
+    redirectToLogin(pathname),
+  );
   logoutModal = undefined;
   Modal.destroyAll();
 };

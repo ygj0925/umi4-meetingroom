@@ -55,6 +55,7 @@
     "classnames": "^2.5.1",
     "crypto-js": "^4.2.0",
     "dayjs": "^1.11.13",
+    "jsencrypt": "^3.5.4",
     "keepalive-for-react": "^5.0.11",
     "keepalive-for-react-router": "^5.0.7",
     "numeral": "^2.0.6",

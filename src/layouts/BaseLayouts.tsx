@@ -31,6 +31,7 @@ import ChatFloat from '@/components/ChatFloat';
 import Footer from '@/components/Footer';
 import KeepAliveOutlet from '@/components/KeepAliveOutlet';
 import MultiTab from '@/components/MultiTab';
+import { redirectToLogin } from '@/utils/LoginRedirect';
 import Notify from '@/utils/NotifyUtils';
 import { isLogin, LayoutSetting } from '@/utils/Web';
 
@@ -194,13 +195,19 @@ const BaseLayout: FC<BaseLayoutProps> = () => {
     }
   }, [location.pathname, firstPath]);
 
+  useEffect(() => {
+    if (initialState?.user?.pwdExpired && location.pathname !== '/pwdExpired') {
+      history.replace('/pwdExpired');
+    }
+  }, [initialState?.user?.pwdExpired, location.pathname]);
+
   /**
    * 路由变化
    */
 
   const handlePageChange = () => {
     if (!isLogin(initialState)) {
-      history.push('/user/login');
+      redirectToLogin(`${location.pathname}${location.search}`);
     }
   };
 
@@ -318,9 +325,9 @@ const BaseLayout: FC<BaseLayoutProps> = () => {
        */
 
       avatarProps={{
-        src: 'https://i.pravatar.cc/40',
+        src: initialState?.user?.avatar || 'https://i.pravatar.cc/40',
         size: 'small',
-        title: initialState?.user?.info?.username,
+        title: initialState?.user?.nickname || initialState?.user?.username,
       }}
       /**
        * footer
@@ -361,7 +368,7 @@ const BaseLayout: FC<BaseLayoutProps> = () => {
         />
       )}
       <WaterMark
-        content={initialState?.user?.info?.username}
+        content={initialState?.user?.nickname || initialState?.user?.username}
         style={{ height: '100%' }}
       >
         {multiTab ? <KeepAliveOutlet aliveRef={aliveRef} /> : <Outlet />}

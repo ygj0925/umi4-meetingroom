@@ -3,7 +3,7 @@ import { useModel } from 'umi';
 
 export function useAccess() {
   const { initialState } = useModel('@@initialState');
-  const currentUser = (initialState as any)?.currentUser;
+  const currentUser = initialState?.user;
 
   const permissions = useMemo(() => {
     return currentUser?.permissions || [];
@@ -52,6 +52,6 @@ export function useAccess() {
     hasRole,
     hasAnyPermission,
     hasAllPermissions,
-    isAdmin: roles.includes('ROLE_ADMIN'),
+    isAdmin: roles.includes('admin') || roles.includes('super_admin'),
   };
 }

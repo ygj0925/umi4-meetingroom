@@ -5,7 +5,7 @@ import type { GLOBAL } from '@/typings';
 import pageMap from '@/utils/pageImports';
 
 export type ExpandRoute = {
-  id?: number;
+  id?: string;
   redirect?: string;
   meta?: Record<string, any>;
   exact?: boolean;
@@ -17,6 +17,21 @@ export type ExpandRoute = {
 let menuDict: Record<string, ExpandRoute> = {};
 let cachedMenuRoutes: ExpandRoute[] = [];
 let cachedFirstPath: string | undefined;
+
+const componentAliases: Record<string, string> = {
+  'dashboard/workplace/index': 'welcome/Welcome',
+  'system/user/index': 'system/user/SysUserPage',
+  'system/role/index': 'system/role/SysRolePage',
+  'system/menu/index': 'system/menu/SysMenuPage',
+  'system/dept/index': 'system/organization/SysOrganizationPage',
+  'system/dict/index': 'system/dict/SysDictPage',
+  'system/config/index': 'system/config/SysConfigPage',
+  'system/notice/index': 'notify/announcement/AnnouncementPage',
+  'monitor/log/login/index': 'log/login-log/LoginLogPage',
+  'monitor/log/operation/index': 'log/operation-log/OperationLogPage',
+  'monitor/log/access/index': 'log/access-log/AccessLogPage',
+  'system/i18n/index': 'i18n/I18nDataPage',
+};
 
 function getRedirectPath(menu: ExpandRoute): string {
   let redirectPath = menu.path;
@@ -48,46 +63,51 @@ function getFirstUrl(menuArray: ExpandRoute[]): string | undefined {
 
 export function serializationRemoteList(
   list: GLOBAL.Router[],
-  pId: number,
-  parentPath: string,
+  _parentId?: string | number,
+  _parentPath = '',
 ): ExpandRoute[] {
-  const routes: ExpandRoute[] = [];
-
-  list.forEach((val) => {
-    if (val.parentId === pId) {
-      const path = val.path.startsWith('/') ? val.path : `/${val.path}`;
+  return [...list]
+    .filter((item) => item.status !== 0 && item.type !== 3)
+    .sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0))
+    .map((item) => {
+      const rawPath = item.path || '';
+      const localPath = rawPath.startsWith('/') ? rawPath : `/${rawPath}`;
+      const fullPath = item.isExternal ? rawPath : localPath;
+      const children = item.children?.length
+        ? serializationRemoteList(item.children, item.id, fullPath)
+        : [];
+      const isPage = item.type === 2;
       const route: ExpandRoute = {
-        id: val.id,
-        hideInMenu: Boolean(val.hidden),
-        icon: val.icon,
+        id: String(item.id),
+        hideInMenu: item.isHidden ?? item.hidden,
+        icon: item.icon,
         locale: false,
-        path: `${parentPath}${path}`,
-        name: val.title,
-        exact: val.type === 1,
-        meta: val,
+        path: fullPath,
+        name: item.title,
+        exact: isPage,
+        meta: item,
       };
 
-      if (val.type === 0) {
-        const childrenArray = serializationRemoteList(list, val.id, route.path);
-        route.routes = childrenArray;
-        route.children = childrenArray;
-        route.meta = { ...route.meta, redirectPath: getRedirectPath(route) };
-      } else if (val.type === 1) {
-        if (val.targetType === 1) {
-          route.component = val.uri;
-        } else if (val.targetType === 2) {
-          route.component = '__inline__';
-        } else {
-          route.target = '_blank';
-          route.path = val.uri;
-        }
-        menuDict[route.path] = route;
+      if (children.length > 0) {
+        route.routes = children;
+        route.children = children;
+        route.meta = {
+          ...item,
+          redirectPath: item.redirect || getRedirectPath(route),
+        };
       }
-      routes.push(route);
-    }
-  });
 
-  return routes;
+      if (isPage) {
+        if (item.isExternal) {
+          route.target = '_blank';
+        } else {
+          route.component = item.component || item.uri;
+          menuDict[fullPath] = route;
+        }
+      }
+
+      return route;
+    });
 }
 
 export async function fetchAndCacheRoutes(): Promise<void> {
@@ -95,48 +115,72 @@ export async function fetchAndCacheRoutes(): Promise<void> {
   const list = res?.data ?? [];
   const arr = Array.isArray(list) ? list : [];
   menuDict = {};
-  cachedMenuRoutes = serializationRemoteList(arr, 0, '');
+  cachedMenuRoutes = serializationRemoteList(arr);
   cachedFirstPath = getFirstUrl(cachedMenuRoutes);
 }
 
-function buildClientRoute(route: ExpandRoute): any {
-  const result: any = { path: route.path, id: `dynamic-${route.id}` };
+function buildClientPageRoute(route: ExpandRoute): any {
+  let LazyComponent: React.LazyExoticComponent<any>;
 
-  if (route.exact && route.component) {
-    let LazyComponent: React.LazyExoticComponent<any>;
+  if (route.component === '__inline__') {
+    LazyComponent = React.lazy(() => import('@/components/Inline'));
+  } else {
+    const uri = route.component
+      ? componentAliases[route.component] || route.component
+      : '';
+    const loader = pageMap[uri];
+    LazyComponent = React.lazy(loader ?? (() => import('@/pages/404')));
+  }
 
-    if (route.component === '__inline__') {
-      LazyComponent = React.lazy(() => import('@/components/Inline'));
-    } else {
-      const uri = route.component;
-      const loader = pageMap[uri];
-      LazyComponent = React.lazy(loader ?? (() => import('@/pages/404')));
-    }
-
-    result.element = React.createElement(
+  return {
+    path: route.path,
+    id: `dynamic-${route.id}`,
+    element: React.createElement(
       React.Suspense,
       { fallback: React.createElement('div') },
       React.createElement(LazyComponent),
-    );
-  }
+    ),
+  };
+}
 
-  if (route.children && route.children.length > 0) {
-    result.children = route.children.map(buildClientRoute);
-    result.children.push({
+function flattenClientPageRoutes(menuRoutes: ExpandRoute[]): any[] {
+  const pageRoutes: any[] = [];
+  const registeredPaths = new Set<string>();
+
+  const visit = (routes: ExpandRoute[]) => {
+    routes.forEach((route) => {
+      if (
+        route.exact &&
+        route.path &&
+        !route.target &&
+        !registeredPaths.has(route.path)
+      ) {
+        registeredPaths.add(route.path);
+        pageRoutes.push(buildClientPageRoute(route));
+      }
+
+      if (route.children?.length) {
+        visit(route.children);
+      }
+    });
+  };
+
+  visit(menuRoutes);
+  return pageRoutes;
+}
+
+export function buildClientRoutes(menuRoutes: ExpandRoute[]): any[] {
+  return [
+    ...flattenClientPageRoutes(menuRoutes),
+    {
       path: '*',
       element: React.createElement(
         React.Suspense,
         { fallback: React.createElement('div') },
         React.createElement(React.lazy(() => import('@/pages/404'))),
       ),
-    });
-  }
-
-  return result;
-}
-
-export function buildClientRoutes(menuRoutes: ExpandRoute[]): any[] {
-  return menuRoutes.map(buildClientRoute);
+    },
+  ];
 }
 
 export function getCachedMenuRoutes(): ExpandRoute[] {

@@ -16,7 +16,8 @@ if (process.env.UMI_TAG === 'zy') {
       'process.env.wxAppid': 'wxa070ce17d52441f5',
       'process.env.wxRedirectUri': 'https://login.3sbio.com',
       'process.env.loginUrl': 'https://dev-login.3sbio.com/user/login',
-      'process.env.requestPrefix': '/api',
+      'process.env.requestPrefix': '/sss-task',
+      'process.env.clientId': 'ef51c9a3e9046c4f2ea45142c8a8344a',
     },
   });
 } else {
@@ -29,7 +30,8 @@ if (process.env.UMI_TAG === 'zy') {
       'process.env.wxAppid': 'ww5cbc027668864f89',
       'process.env.wxRedirectUri': 'https://dev-login.3s-guojian.com',
       'process.env.loginUrl': 'https://dev-login.3s-guojian.com/user/login',
-      'process.env.requestPrefix': '/api',
+      'process.env.requestPrefix': '/sss-task',
+      'process.env.clientId': 'ef51c9a3e9046c4f2ea45142c8a8344a',
     },
   });
 }

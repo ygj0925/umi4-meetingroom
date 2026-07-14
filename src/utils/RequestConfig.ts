@@ -2,7 +2,7 @@
 import { message, notification } from 'antd';
 import type { AxiosResponse } from 'axios';
 import Notify from '@/utils/NotifyUtils';
-import { isLogin, Token } from '@/utils/Web';
+import { Tenant, Token } from '@/utils/Web';
 
 interface ICodeMessage {
   [propName: number]: string;
@@ -84,7 +84,7 @@ export const requestConfig: RequestConfig = {
 
   requestInterceptors: [
     (config: RequestOptions): RequestOptions => {
-      const prefix = process.env.requestPrefix || '/api';
+      const prefix = process.env.requestPrefix || '/sss-task';
 
       const cleanPrefix = prefix.endsWith('/') ? prefix.slice(0, -1) : prefix;
 
@@ -98,8 +98,13 @@ export const requestConfig: RequestConfig = {
         ...(config.headers as Record<string, string>),
       };
 
-      if (token && isLogin()) {
+      if (token) {
         headers.Authorization = `Bearer ${token}`;
+      }
+
+      const tenantId = Tenant.get();
+      if (tenantId) {
+        headers['X-Tenant-Id'] = tenantId;
       }
 
       return {
@@ -125,6 +130,10 @@ export const requestConfig: RequestConfig = {
 
       const { success, code, msg, errorCode, errorMessage } = res;
 
+      if (String(code) === '401') {
+        Notify.logout();
+      }
+
       // 401 直接退出
       if (status === 401) {
         Notify.logout();
@@ -134,8 +143,12 @@ export const requestConfig: RequestConfig = {
 
       const isBizError =
         success === false ||
-        (typeof code !== 'undefined' && Number(code) !== 200) ||
-        (typeof errorCode !== 'undefined' && Number(errorCode) !== 0);
+        (typeof success === 'undefined' &&
+          typeof code !== 'undefined' &&
+          !['0', '200'].includes(String(code))) ||
+        (typeof success === 'undefined' &&
+          typeof errorCode !== 'undefined' &&
+          Number(errorCode) !== 0);
 
       if (isBizError) {
         throw new BizError(errorMessage || msg || '业务处理失败', res);
