@@ -176,21 +176,6 @@ export default defineConfig({
    */
   mako: isProd
     ? ({
-        codeSplitting: {
-          strategy: 'granular',
-          options: {
-            frameworkPackages: [
-              'react',
-              'react-dom',
-              'antd',
-              '@ant-design/icons',
-              '@ant-design/pro-components',
-              '@ant-design/pro-layout',
-              '@ant-design/x',
-            ],
-            libMinSize: 160000,
-          },
-        },
         optimization: {
           skipModules: true,
           concatenateModules: true,

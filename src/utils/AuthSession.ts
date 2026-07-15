@@ -5,9 +5,11 @@ import { LoginRedirect, Tenant, Token, User } from '@/utils/Web';
 export async function establishAuthSession(token: string, tenantId: string) {
   Token.set(token);
   Tenant.set(tenantId);
-  const userResponse = await getUserInfo();
+  const [userResponse] = await Promise.all([
+    getUserInfo(),
+    fetchAndCacheRoutes(),
+  ]);
   User.set(JSON.stringify(userResponse.data));
-  await fetchAndCacheRoutes();
   return userResponse.data;
 }
 

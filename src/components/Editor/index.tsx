@@ -4,7 +4,7 @@ import type {
   IToolbarConfig,
 } from '@wangeditor/editor';
 import { Editor, Toolbar } from '@wangeditor/editor-for-react';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import '@wangeditor/editor/dist/css/style.css';
 
 interface EditorProps {
@@ -37,38 +37,44 @@ const EditorComponent: React.FC<EditorProps> = ({
     };
   }, [editor]);
 
-  const toolbarConfig: Partial<IToolbarConfig> = {};
+  const toolbarConfig = useMemo<Partial<IToolbarConfig>>(() => ({}), []);
 
-  const editorConfig: Partial<IEditorConfig> = {
-    placeholder,
-    readOnly,
-    MENU_CONF: {
-      uploadImage: {
-        customUpload: async (file: File, insertFn: (url: string) => void) => {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            insertFn(e.target?.result as string);
-          };
-          reader.readAsDataURL(file);
+  const editorConfig = useMemo<Partial<IEditorConfig>>(
+    () => ({
+      placeholder,
+      readOnly,
+      MENU_CONF: {
+        uploadImage: {
+          customUpload: async (file: File, insertFn: (url: string) => void) => {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+              insertFn(event.target?.result as string);
+            };
+            reader.readAsDataURL(file);
+          },
+        },
+        uploadVideo: {
+          customUpload: async (file: File, insertFn: (url: string) => void) => {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+              insertFn(event.target?.result as string);
+            };
+            reader.readAsDataURL(file);
+          },
         },
       },
-      uploadVideo: {
-        customUpload: async (file: File, insertFn: (url: string) => void) => {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            insertFn(e.target?.result as string);
-          };
-          reader.readAsDataURL(file);
-        },
-      },
+    }),
+    [placeholder, readOnly],
+  );
+
+  const handleChange = useCallback(
+    (newEditor: IDomEditor) => {
+      const newHtml = newEditor.getHtml();
+      setHtml(newHtml);
+      onChange?.(newHtml);
     },
-  };
-
-  const handleChange = (newEditor: IDomEditor) => {
-    const newHtml = newEditor.getHtml();
-    setHtml(newHtml);
-    onChange?.(newHtml);
-  };
+    [onChange],
+  );
 
   return (
     <div style={{ border: '1px solid #ccc', zIndex: 100 }}>

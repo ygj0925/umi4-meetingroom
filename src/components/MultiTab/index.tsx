@@ -52,9 +52,7 @@ const MultiTab: React.FC<MultiTabProps> = ({
 
   const destroyKeys = useCallback(
     async (keys: string[]) => {
-      for (const key of keys) {
-        await aliveRef.current?.destroy(key);
-      }
+      await Promise.all(keys.map((key) => aliveRef.current?.destroy(key)));
     },
     [aliveRef],
   );
@@ -151,11 +149,15 @@ const MultiTab: React.FC<MultiTabProps> = ({
   if (tabStyle === 'card') cls.push('multi-tab-card');
   cls.push(fixed ? 'multi-tab-fixed' : 'multi-tab-float');
 
-  const tabItems = tabs.map((tab) => ({
-    key: tab.key,
-    label: tab.title,
-    closable: tabs.length > 1,
-  }));
+  const tabItems = useMemo(
+    () =>
+      tabs.map((tab) => ({
+        key: tab.key,
+        label: tab.title,
+        closable: tabs.length > 1,
+      })),
+    [tabs],
+  );
 
   return (
     <Dropdown menu={{ items: menuItems }} trigger={['contextMenu']}>

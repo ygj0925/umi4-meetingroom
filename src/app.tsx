@@ -12,6 +12,25 @@ import {
 import { LayoutSetting, Token, User } from '@/utils/Web';
 import settings from '../config/defaultSettings';
 
+let userInfoPromise: ReturnType<typeof getUserInfo> | undefined;
+let routesPromise: Promise<void> | undefined;
+
+function loadUserInfo() {
+  userInfoPromise ??= getUserInfo().catch((error) => {
+    userInfoPromise = undefined;
+    throw error;
+  });
+  return userInfoPromise;
+}
+
+function loadRoutes() {
+  routesPromise ??= fetchAndCacheRoutes().catch((error) => {
+    routesPromise = undefined;
+    throw error;
+  });
+  return routesPromise;
+}
+
 /**
  * @see https://umijs.org/docs/api/runtime-config#getinitialstate
  * */
@@ -35,7 +54,7 @@ export async function getInitialState(): Promise<{
 
   if (Token.get()) {
     try {
-      const response = await getUserInfo();
+      const [response] = await Promise.all([loadUserInfo(), loadRoutes()]);
       is.user = response.data;
       User.set(JSON.stringify(response.data));
     } catch {
@@ -50,7 +69,8 @@ export async function getInitialState(): Promise<{
 
 export function render(oldRender: () => void) {
   if (Token.get()) {
-    fetchAndCacheRoutes()
+    void loadUserInfo().catch(() => undefined);
+    loadRoutes()
       .then(() => oldRender())
       .catch(() => oldRender());
   } else {

@@ -1,6 +1,7 @@
 import { useIntl } from '@umijs/max';
 import { Modal } from 'antd';
-import React from 'react';
+import DOMPurify from 'dompurify';
+import React, { useMemo } from 'react';
 
 interface AnnouncementPreviewProps {
   visible: boolean;
@@ -14,6 +15,7 @@ const AnnouncementPreview: React.FC<AnnouncementPreviewProps> = ({
   onCancel,
 }) => {
   const intl = useIntl();
+  const safeContent = useMemo(() => DOMPurify.sanitize(content), [content]);
 
   return (
     <Modal
@@ -23,9 +25,9 @@ const AnnouncementPreview: React.FC<AnnouncementPreviewProps> = ({
       footer={null}
       width={600}
     >
-      {/* biome-ignore lint/security/noDangerouslySetInnerHtml: preview trusted admin HTML content */}
       <div
-        dangerouslySetInnerHTML={{ __html: content }} // eslint-disable-line react/no-danger
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: content is sanitized with DOMPurify
+        dangerouslySetInnerHTML={{ __html: safeContent }}
         style={{ padding: 16, background: '#f5f5f5', borderRadius: 4 }}
       />
     </Modal>

@@ -1,14 +1,8 @@
-import {
-  CloseOutlined,
-  CommentOutlined,
-  FullscreenOutlined,
-} from '@ant-design/icons';
-import { XProvider } from '@ant-design/x';
-import { history } from '@umijs/max';
-import React, { useCallback, useRef, useState } from 'react';
-import ChatPanel from '@/pages/chat/components/ChatPanel';
-import { useChat } from '@/pages/chat/hooks/useChat';
+import { CommentOutlined } from '@ant-design/icons';
+import React, { Suspense, useCallback, useRef, useState } from 'react';
 import './index.css';
+
+const ChatWindow = React.lazy(() => import('./ChatWindow'));
 
 const DRAG_THRESHOLD = 5;
 const BUTTON_SIZE = 48;
@@ -16,10 +10,10 @@ const EDGE_MARGIN = 12;
 
 const ChatFloat: React.FC = () => {
   const [open, setOpen] = useState(false);
-  const [pos, setPos] = useState({
+  const [pos, setPos] = useState(() => ({
     x: window.innerWidth - BUTTON_SIZE - 24,
     y: window.innerHeight - BUTTON_SIZE - 24,
-  });
+  }));
   const dragState = useRef({
     dragging: false,
     startX: 0,
@@ -28,17 +22,6 @@ const ChatFloat: React.FC = () => {
     startPosY: 0,
     moved: false,
   });
-
-  const {
-    sessions,
-    activeSessionId,
-    messages,
-    streaming,
-    sendMessage,
-    cancelStream,
-  } = useChat();
-
-  const currentSession = sessions.find((s) => s.id === activeSessionId);
 
   const clamp = useCallback((x: number, y: number) => {
     const maxX = window.innerWidth - BUTTON_SIZE - EDGE_MARGIN;
@@ -125,45 +108,10 @@ const ChatFloat: React.FC = () => {
         <CommentOutlined style={{ fontSize: 22, color: '#fff' }} />
       </div>
 
-      {/* Chat Window */}
       {open && (
-        <div className="chat-float-window">
-          <XProvider>
-            <div className="chat-float-inner">
-              <div className="chat-float-header">
-                <span style={{ fontWeight: 500 }}>
-                  {currentSession?.label || '智能助手'}
-                </span>
-                <span>
-                  <FullscreenOutlined
-                    className="chat-float-header-icon"
-                    onClick={() => {
-                      setOpen(false);
-                      history.push(
-                        activeSessionId
-                          ? `/chat?sessionId=${activeSessionId}`
-                          : '/chat',
-                      );
-                    }}
-                  />
-                  <CloseOutlined
-                    className="chat-float-header-icon"
-                    onClick={() => setOpen(false)}
-                  />
-                </span>
-              </div>
-              <div style={{ flex: 1, overflow: 'hidden' }}>
-                <ChatPanel
-                  messages={messages}
-                  streaming={streaming}
-                  onSend={sendMessage}
-                  onCancel={cancelStream}
-                  compact
-                />
-              </div>
-            </div>
-          </XProvider>
-        </div>
+        <Suspense fallback={null}>
+          <ChatWindow onClose={() => setOpen(false)} />
+        </Suspense>
       )}
     </>
   );

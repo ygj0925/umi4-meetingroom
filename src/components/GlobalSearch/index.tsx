@@ -37,9 +37,13 @@ export default function GlobalSearch() {
     if (!value) return [];
 
     return menus
-      .filter((item) => item.name?.toLowerCase().includes(value.toLowerCase()))
+      .filter((item): item is MenuItem & { path: string } =>
+        Boolean(
+          item.path && item.name?.toLowerCase().includes(value.toLowerCase()),
+        ),
+      )
       .map((item) => ({
-        value: item.path!,
+        value: item.path,
         label: item.name,
       }));
   }, [value, menus]);

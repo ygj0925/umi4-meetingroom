@@ -18,10 +18,15 @@ const Icon: React.FC<IconProps> = (props: IconProps) => {
 
   // type 值异常
   if (!type || type.length === 0) {
-    return <></>;
+    return null;
   }
 
-  const IconType = icons[type] || icons[convertTypeToIconPath(type)];
+  const iconRegistry = icons as unknown as Record<
+    string,
+    React.ComponentType<any>
+  >;
+  const IconType =
+    iconRegistry[type] || iconRegistry[convertTypeToIconPath(type)];
 
   return IconType ? (
     <IconType {...props} />

@@ -6,6 +6,7 @@ import { mergeTools } from '../utils/mergeTools';
 import { useChatStream } from './useChatStream';
 
 const CHAT_URL = '/chat/completions';
+const EMPTY_MESSAGES: ChatMessage[] = [];
 
 function genKey() {
   return `msg_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
@@ -21,9 +22,17 @@ export function useChat(defaultSessionId?: string) {
   );
   const { streaming, send, cancel } = useChatStream();
   const activeSessionIdRef = useRef(activeSessionId);
+  const messagesMapRef = useRef(messagesMap);
+  const historyRequestsRef = useRef(new Map<string, Promise<void>>());
   activeSessionIdRef.current = activeSessionId;
+  messagesMapRef.current = messagesMap;
 
-  const messages = activeSessionId ? (messagesMap[activeSessionId] ?? []) : [];
+  const messages = activeSessionId
+    ? (messagesMap[activeSessionId] ?? EMPTY_MESSAGES)
+    : EMPTY_MESSAGES;
+  const hasActiveHistory = activeSessionId
+    ? Boolean(messagesMap[activeSessionId])
+    : false;
 
   const updateMessages = useCallback(
     (sessionId: string, updater: (prev: ChatMessage[]) => ChatMessage[]) => {
@@ -48,23 +57,33 @@ export function useChat(defaultSessionId?: string) {
     }
   }, []);
 
-  const loadHistory = useCallback(
-    async (sessionId: string) => {
-      if (messagesMap[sessionId]) return;
+  const loadHistory = useCallback(async (sessionId: string) => {
+    if (messagesMapRef.current[sessionId]) return;
+    const existing = historyRequestsRef.current.get(sessionId);
+    if (existing) return existing;
+
+    const request = (async () => {
       try {
         const res = await chatService.getHistory(sessionId);
-        const list = (res?.data ?? []).map((m) => ({
-          ...m,
-          key: m.key || genKey(),
+        const list = (res?.data ?? []).map((item) => ({
+          ...item,
+          key: item.key || genKey(),
           status: 'success' as const,
         }));
-        setMessagesMap((prev) => ({ ...prev, [sessionId]: list }));
+        setMessagesMap((current) => {
+          const next = { ...current, [sessionId]: list };
+          messagesMapRef.current = next;
+          return next;
+        });
       } catch {
         message.error('加载聊天记录失败');
+      } finally {
+        historyRequestsRef.current.delete(sessionId);
       }
-    },
-    [messagesMap],
-  );
+    })();
+    historyRequestsRef.current.set(sessionId, request);
+    return request;
+  }, []);
 
   const createSessionFn = useCallback(async () => {
     try {
@@ -110,7 +129,7 @@ export function useChat(defaultSessionId?: string) {
         loadHistory(id);
       }
     },
-    [messagesMap, loadHistory],
+    [loadHistory],
   );
 
   const sendMessage = useCallback(
@@ -193,10 +212,10 @@ export function useChat(defaultSessionId?: string) {
   }, [loadSessions]);
 
   useEffect(() => {
-    if (activeSessionId && !messagesMap[activeSessionId]) {
+    if (activeSessionId && !hasActiveHistory) {
       loadHistory(activeSessionId);
     }
-  }, [activeSessionId]);
+  }, [activeSessionId, hasActiveHistory, loadHistory]);
 
   return {
     sessions,

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import Icon from '@/components/Icon';
 import './IconSelect.less';
 import { Input, Modal, Tabs } from 'antd';
@@ -400,11 +400,10 @@ export type IconSelectProps = {
 
 const IconSelect = (props: IconSelectProps) => {
   const { value, onChange = () => {} } = props;
-  const [tabPanes, setTabPanes] = useState<React.ReactNode[]>([]);
   const [visible, setVisible] = useState(false);
   const [selectIcon, setSelectIcon] = useState(value);
 
-  useEffect(() => {
+  const tabPanes = useMemo(() => {
     const tabs: React.ReactNode[] = [];
     // 加载数据
     iconTypeArray.forEach((iconType) => {
@@ -439,8 +438,8 @@ const IconSelect = (props: IconSelectProps) => {
       );
     });
 
-    setTabPanes(tabs);
-  }, [value, selectIcon]);
+    return tabs;
+  }, [selectIcon]);
 
   return (
     <>
@@ -471,7 +470,7 @@ const IconSelect = (props: IconSelectProps) => {
       />
 
       <Modal
-        visible={visible}
+        open={visible}
         onCancel={() => setVisible(false)}
         onOk={() => {
           onChange(selectIcon);

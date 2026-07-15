@@ -28,15 +28,34 @@ export function useChatStream() {
       const controller = new AbortController();
       abortRef.current = controller;
       setStreaming(true);
+      let bufferedChunk: ChatStreamChunk | undefined;
+      let flushTimer: ReturnType<typeof setTimeout> | undefined;
+
+      const flush = () => {
+        if (flushTimer) clearTimeout(flushTimer);
+        flushTimer = undefined;
+        if (!bufferedChunk) return;
+        callbacks.onChunk(bufferedChunk);
+        bufferedChunk = undefined;
+      };
 
       try {
         for await (const chunk of chatSSE(url, body, controller.signal)) {
           if (chunk.status === 'error') {
+            flush();
             callbacks.onError(new Error(chunk.content || '服务端返回错误'));
             return;
           }
-          callbacks.onChunk(chunk);
+          bufferedChunk = bufferedChunk
+            ? {
+                ...chunk,
+                content: bufferedChunk.content + chunk.content,
+                tools: [...(bufferedChunk.tools ?? []), ...(chunk.tools ?? [])],
+              }
+            : chunk;
+          flushTimer ??= setTimeout(flush, 16);
         }
+        flush();
         callbacks.onComplete();
       } catch (err: any) {
         if (err?.name === 'AbortError') {
@@ -49,6 +68,7 @@ export function useChatStream() {
           );
         }
       } finally {
+        if (flushTimer) clearTimeout(flushTimer);
         abortRef.current = null;
         setStreaming(false);
       }

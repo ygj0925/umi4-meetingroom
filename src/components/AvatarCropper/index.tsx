@@ -60,23 +60,27 @@ const AvatarCropper: React.FC<AvatarCropperProps> = ({
         height: outputHeight,
       });
 
-      canvas.toBlob(
-        async (blob: Blob | null) => {
-          if (blob) {
-            await onUpload(blob);
-            handleCancel();
-          }
-          setLoading(false);
-        },
-        'image/jpeg',
-        0.9,
-      );
+      const blob = await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob(
+          (result: Blob | null) => {
+            if (result) resolve(result);
+            else reject(new Error('Failed to create cropped image'));
+          },
+          'image/jpeg',
+          0.9,
+        );
+      });
+      await onUpload(blob);
+      setImage(null);
+      setFileName('');
+      onCancel();
     } catch (error) {
       console.error('Crop failed:', error);
       message.error('裁剪失败，请重试');
+    } finally {
       setLoading(false);
     }
-  }, [onUpload, outputWidth, outputHeight]);
+  }, [onCancel, onUpload, outputWidth, outputHeight]);
 
   const handleCancel = useCallback(() => {
     setImage(null);

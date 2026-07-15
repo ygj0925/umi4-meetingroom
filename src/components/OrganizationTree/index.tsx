@@ -1,6 +1,13 @@
 import type { TreeProps } from 'antd';
 import { Input, Tree } from 'antd';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  startTransition,
+  useCallback,
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import type { SysOrganizationVo } from '@/services/web/system';
 import { organization } from '@/services/web/system';
 
@@ -20,6 +27,7 @@ const OrganizationTree: React.FC<OrganizationTreeProps> = ({
   const [treeData, setTreeData] = useState<any[]>([]);
   const [_loading, setLoading] = useState(false);
   const [searchValue, setSearchValue] = useState('');
+  const deferredSearchValue = useDeferredValue(searchValue);
   const [expandedKeys, setExpandedKeys] = useState<React.Key[]>([]);
 
   const loadTreeData = useCallback(async () => {
@@ -63,13 +71,14 @@ const OrganizationTree: React.FC<OrganizationTreeProps> = ({
   };
 
   const filteredTreeData = useMemo(() => {
-    if (!searchValue) return treeData;
+    if (!deferredSearchValue) return treeData;
+    const normalizedSearch = deferredSearchValue.toLowerCase();
 
     const filterTree = (nodes: any[]): any[] => {
       return nodes
         .map((node) => {
           const title = node.title as string;
-          const match = title.toLowerCase().includes(searchValue.toLowerCase());
+          const match = title.toLowerCase().includes(normalizedSearch);
           const children = node.children ? filterTree(node.children) : [];
           if (match || children.length > 0) {
             return {
@@ -78,12 +87,12 @@ const OrganizationTree: React.FC<OrganizationTreeProps> = ({
                 <span>
                   {title.substring(
                     0,
-                    title.toLowerCase().indexOf(searchValue.toLowerCase()),
+                    title.toLowerCase().indexOf(normalizedSearch),
                   )}
-                  <span style={{ color: '#f50' }}>{searchValue}</span>
+                  <span style={{ color: '#f50' }}>{deferredSearchValue}</span>
                   {title.substring(
-                    title.toLowerCase().indexOf(searchValue.toLowerCase()) +
-                      searchValue.length,
+                    title.toLowerCase().indexOf(normalizedSearch) +
+                      deferredSearchValue.length,
                   )}
                 </span>
               ) : (
@@ -98,16 +107,17 @@ const OrganizationTree: React.FC<OrganizationTreeProps> = ({
     };
 
     return filterTree(treeData);
-  }, [treeData, searchValue]);
+  }, [deferredSearchValue, treeData]);
 
   const handleSearch = (value: string) => {
     setSearchValue(value);
-    if (value) {
-      const expandKeys = getExpandKeysBySearch(treeData, value);
-      setExpandedKeys(expandKeys);
-    } else {
-      setExpandedKeys(getAllKeys(treeData.map((item) => item.data)));
-    }
+    startTransition(() => {
+      if (value) {
+        setExpandedKeys(getExpandKeysBySearch(treeData, value));
+      } else {
+        setExpandedKeys(getAllKeys(treeData.map((item) => item.data)));
+      }
+    });
   };
 
   const getExpandKeysBySearch = (nodes: any[], searchStr: string): number[] => {

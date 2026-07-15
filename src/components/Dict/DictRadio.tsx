@@ -21,11 +21,17 @@ const DictRadio: React.FC<DictRadioProps> = ({
   }));
 
   if (optionType === 'button') {
-    return <Radio.Group options={options} {...restProps} />;
+    return (
+      <Radio.Group
+        options={options}
+        {...restProps}
+        disabled={loading || restProps.disabled}
+      />
+    );
   }
 
   return (
-    <Radio.Group {...restProps}>
+    <Radio.Group {...restProps} disabled={loading || restProps.disabled}>
       {options.map((option) => (
         <Radio key={option.value} value={option.value}>
           {option.label}

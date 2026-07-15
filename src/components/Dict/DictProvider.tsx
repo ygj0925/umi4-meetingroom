@@ -3,6 +3,8 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
+  useRef,
   useState,
 } from 'react';
 import type { SysDictData, SysDictDataItem } from '@/services/web/system';
@@ -14,6 +16,7 @@ interface DictContextType {
   getDictData: (dictCode: string) => SysDictData | undefined;
   getDictItem: (dictCode: string, value: string) => SysDictDataItem | undefined;
   getDictItemName: (dictCode: string, value: string) => string;
+  ensureDictData: (dictCodes: string[]) => Promise<void>;
   refreshDict: (dictCodes?: string[]) => Promise<void>;
 }
 
@@ -23,6 +26,7 @@ const DictContext = createContext<DictContextType>({
   getDictData: () => undefined,
   getDictItem: () => undefined,
   getDictItemName: () => '',
+  ensureDictData: async () => {},
   refreshDict: async () => {},
 });
 
@@ -33,51 +37,85 @@ interface DictProviderProps {
   dictCodes?: string[];
 }
 
+const EMPTY_DICT_CODES: string[] = [];
+
+function getRealValue(valueType: number, value: string): unknown {
+  switch (valueType) {
+    case 1:
+      return Number(value);
+    case 3:
+      return value === 'true';
+    default:
+      return value;
+  }
+}
+
+function normalizeDictData(item: SysDictData): SysDictData {
+  return {
+    ...item,
+    dictItems: item.dictItems.map((dictItem) => ({
+      ...dictItem,
+      realVal: getRealValue(item.valueType, dictItem.value),
+    })),
+  };
+}
+
 export const DictProvider: React.FC<DictProviderProps> = ({
   children,
-  dictCodes = [],
+  dictCodes = EMPTY_DICT_CODES,
 }) => {
   const [dictMap, setDictMap] = useState<Record<string, SysDictData>>({});
   const [loading, setLoading] = useState(false);
+  const dictMapRef = useRef(dictMap);
+  const pendingRef = useRef(new Map<string, Promise<void>>());
+  dictMapRef.current = dictMap;
 
-  const loadDictData = useCallback(async (codes: string[]) => {
-    if (codes.length === 0) return;
+  const loadDictData = useCallback(async (codes: string[], force = false) => {
+    const uniqueCodes = [...new Set(codes.filter(Boolean))];
+    const waiting = uniqueCodes
+      .map((code) => pendingRef.current.get(code))
+      .filter((request): request is Promise<void> => Boolean(request));
+    const targetCodes = uniqueCodes.filter(
+      (code) =>
+        !pendingRef.current.has(code) && (force || !dictMapRef.current[code]),
+    );
+
+    if (targetCodes.length === 0) {
+      await Promise.all(waiting);
+      return;
+    }
 
     setLoading(true);
-    try {
-      const response = await dict.dictData(codes);
-      if (response?.data) {
-        setDictMap((prev) => {
-          const newMap = { ...prev };
-          response.data.forEach((item) => {
-            newMap[item.dictCode] = {
-              ...item,
-              dictItems: item.dictItems.map((dictItem) => ({
-                ...dictItem,
-                realVal: getRealValue(item.valueType, dictItem.value),
-              })),
-            };
+    const request = (async () => {
+      try {
+        const response = await dict.dictData(targetCodes);
+        if (response?.data) {
+          setDictMap((current) => {
+            const next = { ...current };
+            response.data.forEach((item) => {
+              next[item.dictCode] = normalizeDictData(item);
+            });
+            dictMapRef.current = next;
+            return next;
           });
-          return newMap;
+        }
+      } catch (error) {
+        console.error('Failed to load dict data:', error);
+      } finally {
+        targetCodes.forEach((code) => {
+          if (pendingRef.current.get(code) === request) {
+            pendingRef.current.delete(code);
+          }
         });
+        if (pendingRef.current.size === 0) setLoading(false);
       }
-    } catch (error) {
-      console.error('Failed to load dict data:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    })();
 
-  const getRealValue = (valueType: number, value: string): any => {
-    switch (valueType) {
-      case 1: // Number
-        return Number(value);
-      case 3: // Boolean
-        return value === 'true';
-      default: // String
-        return value;
-    }
-  };
+    targetCodes.forEach((code) => {
+      pendingRef.current.set(code, request);
+    });
+    await Promise.all([...waiting, request]);
+  }, []);
 
   const getDictData = useCallback(
     (dictCode: string) => {
@@ -103,36 +141,49 @@ export const DictProvider: React.FC<DictProviderProps> = ({
     [getDictItem],
   );
 
+  const ensureDictData = useCallback(
+    (codes: string[]) => loadDictData(codes),
+    [loadDictData],
+  );
+
   const refreshDict = useCallback(
     async (codes?: string[]) => {
-      const targetCodes = codes || Object.keys(dictMap);
+      const targetCodes = codes || Object.keys(dictMapRef.current);
       if (targetCodes.length > 0) {
-        await loadDictData(targetCodes);
+        await loadDictData(targetCodes, true);
       }
     },
-    [dictMap, loadDictData],
+    [loadDictData],
   );
 
   useEffect(() => {
     if (dictCodes.length > 0) {
-      loadDictData(dictCodes);
+      void ensureDictData(dictCodes);
     }
-  }, [dictCodes, loadDictData]);
+  }, [dictCodes, ensureDictData]);
 
-  return (
-    <DictContext.Provider
-      value={{
-        dictMap,
-        loading,
-        getDictData,
-        getDictItem,
-        getDictItemName,
-        refreshDict,
-      }}
-    >
-      {children}
-    </DictContext.Provider>
+  const value = useMemo(
+    () => ({
+      dictMap,
+      loading,
+      getDictData,
+      getDictItem,
+      getDictItemName,
+      ensureDictData,
+      refreshDict,
+    }),
+    [
+      dictMap,
+      loading,
+      getDictData,
+      getDictItem,
+      getDictItemName,
+      ensureDictData,
+      refreshDict,
+    ],
   );
+
+  return <DictContext.Provider value={value}>{children}</DictContext.Provider>;
 };
 
 export default DictProvider;

@@ -26,6 +26,7 @@ class Inline extends Component<InlineProps, InlineState> {
 
     return (
       <iframe
+        title="嵌入页面"
         style={{
           boxSizing: 'border-box',
           height: '100%',
