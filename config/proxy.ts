@@ -16,10 +16,11 @@ export default {
    * @doc https://github.com/chimurai/http-proxy-middleware
    */
   dev: {
-    '/sss-task/': {
-      target: 'https://booking-dev.3s-guojian.com',
+    '/dev-api/': {
+      target: 'http://localhost:8000',
       changeOrigin: true,
       secure: false,
+      pathRewrite: { '^/dev-api': '' },
     },
   },
 };

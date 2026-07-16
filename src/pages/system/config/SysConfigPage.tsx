@@ -6,12 +6,19 @@ import {
   ProTable,
 } from '@ant-design/pro-components';
 import { useIntl } from '@umijs/max';
-import { Button, message, Popconfirm, Space } from 'antd';
+import { Button, message, Popconfirm, Space, Tabs } from 'antd';
 import React, { useRef, useState } from 'react';
 import AccessControl from '@/components/AccessControl';
 import type { SysConfigVo } from '@/services/web/system';
 import { config } from '@/services/web/system';
+import ClientConfig from './components/ClientConfig';
 import ConfigForm from './components/ConfigForm';
+import LoginConfig from './components/LoginConfig';
+import MailConfig from './components/MailConfig';
+import SecurityConfig from './components/SecurityConfig';
+import SiteConfig from './components/SiteConfig';
+import SmsConfig from './components/SmsConfig';
+import StorageConfig from './components/StorageConfig';
 
 const ConfigPage: React.FC = () => {
   const actionRef = useRef<ActionType>(null);
@@ -108,38 +115,62 @@ const ConfigPage: React.FC = () => {
 
   return (
     <PageContainer>
-      <ProTable<SysConfigVo>
-        headerTitle={intl.formatMessage({ id: 'system.config.title' })}
-        actionRef={actionRef}
-        rowKey="id"
-        columns={columns}
-        request={async (params) => {
-          const { current, pageSize, ...rest } = params;
-          const response = await config.query({
-            page: current as number,
-            size: pageSize as number,
-            ...rest,
-          });
-          return {
-            data: response.data?.records || [],
-            total: response.data?.total || 0,
-            success: true,
-          };
-        }}
-        toolBarRender={() => [
-          <AccessControl key="add" permission="system:config:edit">
-            <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-              {intl.formatMessage({ id: 'common.operation.add' })}
-            </Button>
-          </AccessControl>,
+      <Tabs
+        items={[
+          {
+            key: 'params',
+            label: '参数配置',
+            children: (
+              <>
+                <ProTable<SysConfigVo>
+                  headerTitle={intl.formatMessage({
+                    id: 'system.config.title',
+                  })}
+                  actionRef={actionRef}
+                  rowKey="id"
+                  columns={columns}
+                  request={async (params) => {
+                    const { current, pageSize, ...rest } = params;
+                    const response = await config.query({
+                      page: current as number,
+                      size: pageSize as number,
+                      ...rest,
+                    });
+                    return {
+                      data: response.data?.records || [],
+                      total: response.data?.total || 0,
+                      success: true,
+                    };
+                  }}
+                  toolBarRender={() => [
+                    <AccessControl key="add" permission="system:config:edit">
+                      <Button
+                        type="primary"
+                        icon={<PlusOutlined />}
+                        onClick={handleAdd}
+                      >
+                        {intl.formatMessage({ id: 'common.operation.add' })}
+                      </Button>
+                    </AccessControl>,
+                  ]}
+                />
+                <ConfigForm
+                  visible={formVisible}
+                  config={currentConfig}
+                  onCancel={() => setFormVisible(false)}
+                  onSuccess={handleFormSuccess}
+                />
+              </>
+            ),
+          },
+          { key: 'site', label: '站点配置', children: <SiteConfig /> },
+          { key: 'security', label: '安全配置', children: <SecurityConfig /> },
+          { key: 'mail', label: '邮件配置', children: <MailConfig /> },
+          { key: 'login', label: '登录配置', children: <LoginConfig /> },
+          { key: 'storage', label: '存储配置', children: <StorageConfig /> },
+          { key: 'sms', label: '短信配置', children: <SmsConfig /> },
+          { key: 'client', label: '客户端配置', children: <ClientConfig /> },
         ]}
-      />
-
-      <ConfigForm
-        visible={formVisible}
-        config={currentConfig}
-        onCancel={() => setFormVisible(false)}
-        onSuccess={handleFormSuccess}
       />
     </PageContainer>
   );
