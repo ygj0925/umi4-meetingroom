@@ -1,4 +1,5 @@
 import {
+  BellOutlined,
   DashboardOutlined,
   FormOutlined,
   GithubFilled,
@@ -22,9 +23,9 @@ import {
   WaterMark,
 } from '@ant-design/pro-components';
 import { history, Link, Outlet, useLocation, useModel } from '@umijs/max';
-import { Input, theme } from 'antd';
+import { Badge, Input, theme } from 'antd';
 import { useKeepAliveRef } from 'keepalive-for-react';
-import React, { type FC, useEffect, useMemo } from 'react';
+import React, { type FC, useEffect, useMemo, useState } from 'react';
 import defaultSettings from '@/../config/defaultSettings';
 import routesConfig from '@/../config/routes';
 import ChatFloat from '@/components/ChatFloat';
@@ -32,6 +33,7 @@ import { DictProvider } from '@/components/Dict';
 import Footer from '@/components/Footer';
 import KeepAliveOutlet from '@/components/KeepAliveOutlet';
 import MultiTab from '@/components/MultiTab';
+import { getUnreadCount } from '@/services/web/user-message';
 import { redirectToLogin } from '@/utils/LoginRedirect';
 import Notify from '@/utils/NotifyUtils';
 import { isLogin, LayoutSetting } from '@/utils/Web';
@@ -159,6 +161,21 @@ const BaseLayout: FC<BaseLayoutProps> = () => {
       });
     }
   }, [multiTab, aliveRef]);
+
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (!isLogin(initialState)) return;
+    getUnreadCount()
+      .then((res) => {
+        if (res?.data) {
+          setUnreadCount(
+            typeof res.data === 'number' ? res.data : res.data.total || 0,
+          );
+        }
+      })
+      .catch(() => {});
+  }, [initialState, location.pathname]);
 
   /**
    * 动态菜单 model
@@ -317,6 +334,12 @@ const BaseLayout: FC<BaseLayoutProps> = () => {
             props.layout !== 'side' ? (
               <SearchInput key="SearchInput" />
             ) : undefined,
+            <Badge key="bell" count={unreadCount} size="small" offset={[-2, 2]}>
+              <BellOutlined
+                style={{ fontSize: 16, cursor: 'pointer' }}
+                onClick={() => history.push('/user/message')}
+              />
+            </Badge>,
             <InfoCircleFilled key="InfoCircleFilled" />,
             <QuestionCircleFilled key="QuestionCircleFilled" />,
             <GithubFilled key="GithubFilled" />,
