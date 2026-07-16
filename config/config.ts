@@ -184,6 +184,7 @@ export default defineConfig({
     : {},
   define: {
     'process.env.CI': process.env.CI,
+    'process.env.loginMode': isProd ? 'sso' : 'password',
   },
   tailwindcss: {},
 });

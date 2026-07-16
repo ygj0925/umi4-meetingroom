@@ -30,6 +30,7 @@ import {
   resolveLoginRedirect,
 } from '@/utils/AuthSession';
 import { encryptByRsa } from '@/utils/Encrypt';
+import { isPasswordLoginEnabled, redirectToLogin } from '@/utils/LoginRedirect';
 import Settings from '../../../config/defaultSettings';
 
 type LoginMode = 'account' | 'phone' | 'email';
@@ -45,6 +46,10 @@ type LoginFormValues = {
 const AuthLogin: React.FC = () => {
   const { message } = App.useApp();
   const { setInitialState } = useModel('@@initialState');
+  const passwordLoginEnabled = isPasswordLoginEnabled();
+  const searchParams = new URLSearchParams(history.location.search);
+  const ssoError = searchParams.get('ssoError') === '1';
+  const loginRedirect = searchParams.get('redirect') || '/';
   const [form] = Form.useForm<LoginFormValues>();
   const [mode, setMode] = useState<LoginMode>('account');
   const [loading, setLoading] = useState(false);
@@ -71,8 +76,13 @@ const AuthLogin: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    loadCaptcha();
-  }, [loadCaptcha]);
+    if (passwordLoginEnabled) void loadCaptcha();
+  }, [loadCaptcha, passwordLoginEnabled]);
+  useEffect(() => {
+    if (!passwordLoginEnabled && !ssoError) {
+      void redirectToLogin(loginRedirect);
+    }
+  }, [loginRedirect, passwordLoginEnabled, ssoError]);
   useEffect(() => {
     if (!countdown) return;
     const timer = window.setInterval(
@@ -158,6 +168,33 @@ const AuthLogin: React.FC = () => {
       />
     </Form.Item>
   );
+
+  if (!passwordLoginEnabled) {
+    if (!ssoError) return null;
+    return (
+      <div
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 16,
+        }}
+      >
+        <Typography.Title level={4}>三方登录暂时不可用</Typography.Title>
+        <Typography.Text type="secondary">
+          请检查网络后重新发起登录。
+        </Typography.Text>
+        <Button
+          type="primary"
+          onClick={() => void redirectToLogin(loginRedirect)}
+        >
+          重新登录
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <main className="login-page">
