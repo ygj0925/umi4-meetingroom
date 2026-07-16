@@ -84,7 +84,7 @@ export const requestConfig: RequestConfig = {
 
   requestInterceptors: [
     (config: RequestOptions): RequestOptions => {
-      const prefix = process.env.requestPrefix || '/sss-task';
+      const prefix = process.env.requestPrefix || '/dev-api';
 
       const cleanPrefix = prefix.endsWith('/') ? prefix.slice(0, -1) : prefix;
 
